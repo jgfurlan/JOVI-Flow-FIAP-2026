@@ -1,0 +1,539 @@
+CHALLENGE
+
+1º ANO ANÁLISE E
+
+DESENVOLVIMENTO
+DE SISTEMAS
+
+Brand Introduction
+
+© 2026 JOVI and/or its affiliates. All rights reserved.
+
+Marca Vivo Mobile
+Communication
+Presença
+global
+
++
+500 M
+
+Dongguan, China
+
+BRAZIL HQ
+
+Usuários ativos mensais
+
++
+60
+
+Países e
+regiões
+
+São Paulo, SP
+
+GLOBAL HQ
+
+30 anos
+
+Chegada no Brasil
+com a marca JOVI
+
+De atuação na indústria e
+inovação tecnológica
+
+Entrada no
+mercado de
+telefones
+celulares
+1995
+
+Fundação da vivo
+mobile
+
+2004
+
+Estabelecimento do
+Centro de Pesquisa
+em 5G
+2014
+
+Início da
+expansão global
+da marca
+
+2016
+
+2018
+
+Criação do
+Centro Global de
+P&D em
+Inteligência
+Artificial
+
+2025
+
+Marca
+exclusiva
+para o Brasil
+
+Consumidores
+associaram o nosso
+nome aos atributos
+alinhados com
+nossa visão.
+Jovem
+Fácil
+
+Tecnológica
+
+Visão
+
+Desenvolver-nos para nos tornarmos uma empresa de classe
+mundial mais saudável e sustentável.
+
+Missão
+
+Funcionários
+
+Consumidores
+
+Promover um ambiente
+de trabalho positivo e
+em constante evolução
+
+Criar produtos
+excepcionais
+
+Construir plataformas
+de ganho mútuo
+baseadas na confiança
+
+Acionistas
+Entregar retornos
+consistentes e de longo
+prazo sobre o
+investimento
+
+Parceiros
+
+Gerar valor
+Para a
+sociedade
+
+Filosofia
+
+Fazer as coisas certas
+
+.
+
+Filosofia
+
+Fazer certo as coisas .
+
+Objetivos
+Construir
+reconhecimento
+de marca e um
+posicionamento
+premium
+alegre.
+
+Objetivos
+Construir
+confiança com
+consumidores
+e parceiros.
+
+Objetivos
+Gerar valor
+para o Brasil e
+contribuir para
+a sociedade.
+
+Mais
+
+Mais
+
+Produção
+Local
+
+Zona Franca
+de Manaus
+
+Nossa presença
+2026
+*
+
+1500+
+Pontos de
+venda
+
++1000
+Funcionários
+no Brasil
+
+9 escritórios
+regionais
+São Paulo, Rio de
+Janeiro, Brasília,
+Manaus, Belém,
+Fortaleza, Recife,
+Florianópolis e Porto
+Alegre.
+
+*YTD
+
+Usuário no centro
+
+de cada decisão
+
+Centenas
+De entrevistas individuais
+
+Oportunidades
+
+Baixa duração de bateria
+
+Câmera fraca em
+ambientes com pouca luz.
+
+Performance
+
+Baixa durabilidade
+
+Design genérico
+
+Alto custos de reparo
+
+A partir da escuta dos
+consumidores,
+estruturamos o
+portfólio de produto
+da JOVI no Brasil
+
+Portfólio brasileiro
+
+V50 5G
+
+V50 Lite
+
+Y29s 5G
+
+Y29
+
+Y19s
+
+Retratos de nível
+profissional.
+
+Dura mais do que o
+seu dia
+
+Rei da Bateria
+
+Rei da Bateria
+
+Rei da Bateria
+
+ZEISS Camera
+
+Aura Light®
+
+Aura Light®
+
+BlueVolt ® 6.5Ah
+
+BlueVolt ® 6Ah
+
+BlueVolt ® 6.5Ah
+
+BlueVolt ® 5.5Ah
+
+BlueVolt ® 6Ah
+
+Resistência militar
+
+Resistência militar
+
+Resistência militar
+
+Resistência militar
+
+Pacote de benefícios 5
+
+Pacote de benefícios 5 estrelas
+
+Pacote de benefícios premium
+
+Pacote de benefícios premium
+
+2 anos de garantia
+
+estrelas
+
+Lançamento: Mai/25
+
+Lançamento: Ago/25
+
+Lançamento: Jul/25
+
+Lançamento: Set/25
+
+Lançamento: Mai/25
+
+Desafio
+Próxima geração da
+experiência de câmera nos
+celulares JOVI
+
+DESAFIO
+
+Objetivo
+Criar uma solução digital inovadora que melhore a experiência do usuário com câmera e
+consumo de conteúdo em smartphones JOVI, aumentando o engajamento e a percepção
+de performance.
+
+Desenvolver um protótipo funcional ou jornada interativa que:
+❑
+
+❑
+
+❑
+
+Utilize tecnologia web (interface responsiva, carregamento otimizado, simulação de captura
+de mídia, etc.) para melhorar a experiência de uso da câmera e conteúdo.
+Reduza a frustração do usuário com lentidão, complexidade ou dificuldade de uso.
+Simule de forma inteligente a experiência de captura, visualização e compartilhamento de
+conteúdo.
+
+DESAFIO
+
+Objetivo
+A solução deve:
+❑
+
+Ser 100% WEB (não aplicativo), rodando no navegador do celular.
+
+❑
+
+Ser mobile first, com foco total na experiência mobile.
+
+❑
+
+Permitir interação com conteúdo (visualizar, organizar, compartilhar).
+
+❑
+
+Melhorar a percepção de velocidade e desempenho.
+
+DESAFIO
+
+Objetivo
+A solução pode incluir:
+❑
+
+Simulação de captura de fotos/vídeos (interface)
+
+❑
+
+Organização de mídia (galeria inteligente)
+
+❑
+
+Sugestões automáticas de uso
+
+❑
+
+Interface simplificada para edição ou compartilhamento
+
+❑
+
+Feedback visual de performance (ex: carregamento rápido, otimização)
+
+DESAFIO
+
+Exploração Adicional
+A solução pode incluir:
+❑
+
+Simulação de captura de fotos/vídeos (interface)
+
+❑
+
+Organização de mídia (galeria inteligente)
+
+❑
+
+Sugestões automáticas de uso
+
+❑
+
+Interface simplificada para edição ou compartilhamento
+
+❑
+
+Feedback visual de performance (ex: carregamento rápido, otimização)
+
+DICA
+
+DESAFIO
+
+Pense além do óbvio.
+
+Como transformar o uso da câmera em uma experiência mais simples,
+rápida e prazerosa?
+
+Como usar UX + performance + design para melhorar
+a percepção do usuário?
+
+DESAFIO
+
+ENTREGÁVEIS
+Etapa 1: Negócio
+• Solução proposta: Explicar como a solução melhora a experiência com câmera e
+conteúdo
+• Impacto esperado: Como melhora performance, usabilidade e engajamento
+Etapa 2: Modelo Lógico de Dados (MER)
+Etapa 3: Protótipo
+• Demonstração visual da solução
+• Obrigatoriamente WEB responsivo (mobile first)
+• Desenvolvido no Figma
+
+E
+
+09/04 – Kick-off Challenge JOVI – 19h30
+
+1 TDS A, B, C, D e
+
+AGENDA
+
+20/05 – Entrega do Sprint 1 – VALOR 10 Pontos
+Entrega:
+Uma apresentação no formato PDF contendo:
+- Nome completo e RM dos integrantes da equipe.
+- Etapa 1
+- Etapa 2
+- Etapa 3
+Importante
+
+:
+
+Por se tratar de uma challenge, não será possível fazer a entrega posterior com o prazo de três dias valendo 70% da nota.
+Todo o conteúdo do trabalho deve estar dentro do PDF.
+Não serão considerados links externos (Figma, Drive, etc.).
+Não será feita avaliação de materiais fora do PDF.
+
+E
+
+O que esperamos da apresentação
+
+1 TDS A, B, C, D e
+
+AGENDA
+
+A entrega deve ser uma APRESENTAÇÃO (slides) e não um documento Word.
+
+Esperamos que o material:
+- Tenha estrutura clara e organizada em slides
+
+- Utilize cores, identidade visual e bom design
+- Apresente a solução de forma visual e objetiva
+
+Importante
+- Não serão aceitos materiais no formato texto corrido (Word)
+- Utilize ferramentas como: PowerPoint / Google Slides / Canva / Prezi
+
+E
+
+Critérios de avaliação:
+Clareza e estrutura da solução proposta (Etapa 1 – Negócio) – 30%
+
+1 TDS A, B, C, D e
+
+AGENDA
+
+Capacidade de explicar o problema, a solução e o impacto esperado.
+
+Qualidade da modelagem de dados (Etapa 2 – Modelo de Dados) – 20%
+Coerência das entidades, relacionamentos e aderência à solução.
+
+Usabilidade e clareza da interface (Etapa 3 – Protótipo) – 20%
+Clareza das telas, coerência com a proposta da solução e representação funcional das ações do sistema.
+
+Qualidade visual e consistência do protótipo (Etapa 3 – Protótipo) – 20%
+Organização visual, aplicação de hierarquia, alinhamento dos elementos e uso de princípios de design.
+
+Coerência geral entre problema, solução e entrega (Todas as Etapas) – 10%
+Alinhamento entre todas as etapas (negócio + dados + protótipo).
+
+Formação de Equipe
+
+EQUIPES
+
+❑
+
+As equipes só podem ser formadas por alunos da mesma turma, verifique se todos os alunos estão
+na mesma turma (exemplo 1TDSA), antes de iniciar a Challenge.
+
+❑
+
+A entrega na plataforma deve ser feita apenas por um integrante da equipe.
+
+❑
+
+No momento da entrega será formado a equipe na plataforma.
+
+❑
+
+Challenge não tem os três dias de entrega com atraso, fique atento a data de entrega.
+
+❑
+
+No Microsoft Teams você encontra o passo-a-passo para formar a equipe na entrega da atividade.
+
+❑
+
+LIMITE 5 ALUNOS POR EQUIPE.
+
+EQUIPES
+
+Formação de Equipe
+
+EQUIPES
+
+SPRINT 2
+
+16/09 – Entrega do Sprint 2 – VALOR 20 Pontos
+- Desenvolvimento do front-end da aplicação web da solução.
+
+- Utilize HTML, CSS, Bootstrap e Javascript.
+- Com foco na experiência do usuário, com um design responsivo.
+- Conclusão do desenvolvimento e preparação da apresentação da solução.
+
+2º LUGAR
+R$ 3.000,00
+SHAPE E CAMISETA
+
+3º LUGAR
+R$ 2.000,00
+SHAPE E CAMISETA
+
+PREMIAÇÃO
+
+1º LUGAR
+R$ 5.000,00
+SHAPE E CAMISETA
+
+Prêmio
+1 celular JOVI ao grupo ganhador
+
+O futuro da câmera não está em mais
+tecnologia, mas em experiências mais
+humanas, intuitivas e inteligentes.
+
+Thank You!
+
+jovimobile.com
+
+
