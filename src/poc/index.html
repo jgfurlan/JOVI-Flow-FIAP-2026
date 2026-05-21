@@ -37,17 +37,21 @@
             </div>
             <div class="camera-controls">
                 <div class="top-bar">
-                    <button id="btn-flash" class="btn-icon" aria-label="Flash">
-                        <span class="icon-flash"></span>
+                    <button id="btn-flash" class="btn-icon" aria-label="Alternar Flash">
+                        <span class="icon-flash">⚡</span>
                     </button>
-                    <span class="fps-counter" id="fps-counter">-- FPS</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fps-counter" id="fps-counter">-- FPS</span>
+                        <div id="performance-spark" class="performance-spark ready" aria-label="Indicador IA Inteligente" title="IA Status"></div>
+                    </div>
                     <button id="btn-settings" class="btn-icon" aria-label="Configurações">
-                        <span class="icon-settings"></span>
+                        <span class="icon-settings">⚙️</span>
                     </button>
                 </div>
                 <div class="capture-area">
-                    <button id="btn-capture" class="btn-capture" aria-label="Capturar">
+                    <button id="btn-capture" class="btn-capture" aria-label="Capturar foto e ajustar iluminação">
                         <span class="capture-ring"></span>
+                        <span class="capture-button"></span>
                     </button>
                 </div>
                 <div class="bottom-bar">
@@ -55,7 +59,7 @@
                         <div class="thumbnail-placeholder"></div>
                     </button>
                     <button id="btn-switch-camera" class="btn-icon btn-switch" aria-label="Trocar câmera">
-                        <span class="icon-switch"></span>
+                        <span class="icon-switch">🔄</span>
                     </button>
                 </div>
             </div>
@@ -64,21 +68,21 @@
         <!-- Screen 3: Gallery -->
         <section id="screen-gallery" class="screen screen-gallery">
             <header class="gallery-header">
-                <button id="btn-back-camera" class="btn-icon" aria-label="Voltar">
-                    <span class="icon-back"></span>
+                <button id="btn-back-camera" class="btn-icon" aria-label="Voltar para a câmera">
+                    <span class="icon-back">◀</span>
                 </button>
-                <h2>Galeria</h2>
-                <button id="btn-select" class="btn-text" aria-label="Selecionar">Selecionar</button>
+                <h2>Galeria Bento</h2>
+                <button id="btn-select" class="btn-text" aria-label="Selecionar fotos">Selecionar</button>
             </header>
             <div id="gallery-grid" class="gallery-grid">
                 <div class="gallery-empty" id="gallery-empty">
-                    <span class="icon-empty"></span>
+                    <span class="icon-empty">📷</span>
                     <p>Nenhuma foto ainda</p>
                     <button id="btn-goto-camera" class="btn btn-primary">Tirar primeira foto</button>
                 </div>
             </div>
             <footer class="gallery-footer" id="gallery-footer">
-                <button id="btn-share" class="btn btn-primary btn-share" disabled>
+                <button id="btn-share" class="btn btn-primary btn-share" disabled aria-label="Compartilhar selecionadas">
                     Compartilhar
                 </button>
             </footer>
@@ -87,22 +91,22 @@
         <!-- Screen 4: Detail -->
         <section id="screen-detail" class="screen screen-detail">
             <header class="detail-header">
-                <button id="btn-back-gallery" class="btn-icon" aria-label="Voltar">
-                    <span class="icon-back"></span>
+                <button id="btn-back-gallery" class="btn-icon" aria-label="Voltar para galeria">
+                    <span class="icon-back">◀</span>
                 </button>
                 <span id="detail-date" class="detail-date"></span>
-                <button id="btn-delete" class="btn-icon btn-delete" aria-label="Excluir">
-                    <span class="icon-delete"></span>
+                <button id="btn-delete" class="btn-icon btn-delete" aria-label="Excluir foto">
+                    <span class="icon-delete">🗑️</span>
                 </button>
             </header>
             <div class="detail-view">
-                <img id="detail-image" src="" alt="Foto capturada">
+                <img id="detail-image" src="" alt="Foto detalhada">
             </div>
             <div class="detail-actions">
-                <button id="btn-add-tag" class="btn btn-outline">
-                    <span class="icon-tag"></span> Adicionar Tag
+                <button id="btn-add-tag" class="btn btn-outline" aria-label="Adicionar tag">
+                    <span class="icon-tag">🏷️</span> Adicionar Tag
                 </button>
-                <button id="btn-share-photo" class="btn btn-primary">
+                <button id="btn-share-photo" class="btn btn-primary" aria-label="Compartilhar esta foto">
                     Compartilhar
                 </button>
             </div>
@@ -111,25 +115,25 @@
         <!-- Screen 5: Share -->
         <section id="screen-share" class="screen screen-share">
             <header class="share-header">
-                <button id="btn-back-detail" class="btn-icon" aria-label="Voltar">
-                    <span class="icon-back"></span>
+                <button id="btn-back-detail" class="btn-icon" aria-label="Voltar para detalhe">
+                    <span class="icon-back">◀</span>
                 </button>
                 <h2>Compartilhar</h2>
             </header>
             <div class="share-preview">
-                <img id="share-preview-image" src="" alt="Compartilhar">
+                <img id="share-preview-image" src="" alt="Compartilhar visualização">
             </div>
             <div class="share-options">
-                <button class="btn-share-option" data-platform="whatsapp">
-                    <span class="icon-whatsapp"></span>
+                <button class="btn-share-option" data-platform="whatsapp" aria-label="Compartilhar no WhatsApp">
+                    <span class="icon-whatsapp">💬</span>
                     <span>WhatsApp</span>
                 </button>
-                <button class="btn-share-option" data-platform="instagram">
-                    <span class="icon-instagram"></span>
+                <button class="btn-share-option" data-platform="instagram" aria-label="Compartilhar no Instagram">
+                    <span class="icon-instagram">📸</span>
                     <span>Instagram</span>
                 </button>
-                <button class="btn-share-option" data-platform="copy">
-                    <span class="icon-copy"></span>
+                <button class="btn-share-option" data-platform="copy" aria-label="Copiar link da foto">
+                    <span class="icon-copy">📋</span>
                     <span>Copiar</span>
                 </button>
             </div>

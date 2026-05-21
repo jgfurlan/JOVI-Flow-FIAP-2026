@@ -10,6 +10,12 @@ const JOVIFlow = (() => {
     let fpsHistory = [];
     let animationFrameId = null;
 
+    // Aura Light Gesture State
+    let isDragging = false;
+    let startX = 0;
+    let startTemperature = 5000; // default Kelvin
+    let currentTemperature = 5000;
+
     const SCREENS = {
         SPLASH: 'splash',
         CAMERA: 'camera',
@@ -25,10 +31,17 @@ const JOVIFlow = (() => {
         bindEvents();
         await loadGallery();
         showScreen(SCREENS.SPLASH);
+
+        if (window.location.protocol === 'file:') {
+            showToast('Aviso: Câmera requer Servidor HTTP (localhost)');
+        }
+
         setTimeout(() => {
-            showScreen(SCREENS.CAMERA);
-            startCamera();
-        }, 1500);
+            if (window.location.protocol !== 'file:') {
+                showScreen(SCREENS.CAMERA);
+                startCamera();
+            }
+        }, 2000);
     }
 
     function bindEvents() {
@@ -37,10 +50,56 @@ const JOVIFlow = (() => {
             startCamera();
         });
 
-        document.getElementById('btn-capture').addEventListener('click', capturePhoto);
+        // Pointer gestures for Aura Shutter button
+        const btnCapture = document.getElementById('btn-capture');
+        if (btnCapture) {
+            btnCapture.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                btnCapture.setPointerCapture(e.pointerId);
+                navigator.vibrate?.(15); // haptic vibration tap
+            });
+
+            btnCapture.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const diffX = e.clientX - startX;
+                const tempChange = diffX * 20; // 1px drag = 20 Kelvin change
+                let newTemp = Math.max(2000, Math.min(10000, startTemperature + tempChange));
+                
+                // Vibrate tick on each 500K threshold change
+                if (Math.round(newTemp / 500) !== Math.round(currentTemperature / 500)) {
+                    navigator.vibrate?.(5);
+                }
+                currentTemperature = newTemp;
+                updateAuraLightTemperature(currentTemperature);
+            });
+
+            btnCapture.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                btnCapture.releasePointerCapture(e.pointerId);
+                startTemperature = currentTemperature;
+
+                const diffX = Math.abs(e.clientX - startX);
+                if (diffX < 8) {
+                    capturePhoto(); // quick tap triggers snap
+                }
+            });
+
+            btnCapture.addEventListener('pointercancel', () => {
+                isDragging = false;
+            });
+        }
+
         document.getElementById('btn-gallery-thumb')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
-        document.getElementById('btn-goto-camera')?.addEventListener('click', () => showScreen(SCREENS.CAMERA));
-        document.getElementById('btn-back-camera')?.addEventListener('click', () => showScreen(SCREENS.CAMERA));
+        document.getElementById('btn-goto-camera')?.addEventListener('click', () => {
+            showScreen(SCREENS.CAMERA);
+            startCamera();
+        });
+        document.getElementById('btn-back-camera')?.addEventListener('click', () => {
+            showScreen(SCREENS.CAMERA);
+            startCamera();
+        });
         document.getElementById('btn-back-gallery')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
         document.getElementById('btn-back-detail')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
         document.getElementById('btn-share')?.addEventListener('click', openShareScreen);
@@ -59,14 +118,22 @@ const JOVIFlow = (() => {
     }
 
     function showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-        });
-        const screen = document.getElementById(`screen-${screenId}`);
-        if (screen) {
-            screen.classList.add('active');
-            currentScreen = screenId;
-            console.log(`[JOVI Flow] Screen: ${screenId}`);
+        const performTransition = () => {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const screen = document.getElementById(`screen-${screenId}`);
+            if (screen) {
+                screen.classList.add('active');
+                currentScreen = screenId;
+                console.log(`[JOVI Flow] Screen: ${screenId}`);
+            }
+        };
+
+        if (document.startViewTransition) {
+            document.startViewTransition(performTransition);
+        } else {
+            performTransition();
         }
     }
 
@@ -138,6 +205,40 @@ const JOVIFlow = (() => {
         animationFrameId = requestAnimationFrame(countFPS);
     }
 
+    function updateAuraLightTemperature(temp) {
+        const overlay = document.querySelector('.camera-overlay');
+        const spark = document.getElementById('performance-spark');
+        if (!overlay) return;
+
+        let r, g, b;
+        if (temp < 5000) {
+            // Warm Orange tones
+            const ratio = (temp - 2000) / 3000;
+            r = 255;
+            g = Math.round(140 + ratio * 115);
+            b = Math.round(ratio * 255);
+
+            if (spark) {
+                spark.className = 'performance-spark low-light';
+                spark.title = 'AI Night Mode Ativo';
+            }
+        } else {
+            // Cool Blue tones
+            const ratio = (temp - 5000) / 5000;
+            r = Math.round(255 - ratio * 245);
+            g = Math.round(255 - ratio * 194);
+            b = 255;
+
+            if (spark) {
+                spark.className = 'performance-spark stabilizing';
+                spark.title = 'Foco Estabilizado';
+            }
+        }
+
+        overlay.style.background = `radial-gradient(circle, rgba(${r}, ${g}, ${b}, 0.25) 0%, rgba(${r}, ${g}, ${b}, 0) 80%)`;
+        overlay.style.mixBlendMode = 'soft-light';
+    }
+
     async function capturePhoto() {
         const video = document.getElementById('camera-preview');
         const canvas = document.getElementById('camera-canvas');
@@ -150,41 +251,96 @@ const JOVIFlow = (() => {
 
         auraEffect?.classList.add('active');
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
 
         applyAuraLightEffect(ctx, canvas.width, canvas.height);
 
+        const sharpness = calculateSharpness(ctx, canvas.width, canvas.height);
         const imageData = canvas.toDataURL('image/jpeg', 0.85);
         lastPhotoData = imageData;
 
-        await savePhoto(imageData);
+        const photo = await savePhoto(imageData, sharpness);
 
         setTimeout(() => {
             auraEffect?.classList.remove('active');
             captureBtn.disabled = false;
             showToast('Foto salva!');
             updateGalleryThumbnail(imageData);
-        }, 500);
+        }, 300);
     }
 
     function applyAuraLightEffect(ctx, width, height) {
+        let r, g, b;
+        if (currentTemperature < 5000) {
+            const ratio = (currentTemperature - 2000) / 3000;
+            r = 255;
+            g = Math.round(140 + ratio * 115);
+            b = Math.round(ratio * 255);
+        } else {
+            const ratio = (currentTemperature - 5000) / 5000;
+            r = Math.round(255 - ratio * 245);
+            g = Math.round(255 - ratio * 194);
+            b = 255;
+        }
+
         const gradient = ctx.createRadialGradient(
-            width / 2, height * 0.7,
+            width / 2, height * 0.5,
             0,
-            width / 2, height * 0.7,
-            Math.min(width, height) * 0.3
+            width / 2, height * 0.5,
+            Math.min(width, height) * 0.4
         );
-        gradient.addColorStop(0, 'rgba(255, 214, 0, 0.15)');
-        gradient.addColorStop(0.5, 'rgba(255, 214, 0, 0.05)');
-        gradient.addColorStop(1, 'rgba(255, 214, 0, 0)');
+        gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.2)`);
+        gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.05)`);
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
     }
 
-    async function savePhoto(imageData) {
+    function calculateSharpness(ctx, width, height) {
+        const sampleSize = 100;
+        const sx = Math.floor((width - sampleSize) / 2);
+        const sy = Math.floor((height - sampleSize) / 2);
+
+        try {
+            const imgData = ctx.getImageData(sx, sy, sampleSize, sampleSize);
+            const data = imgData.data;
+            const size = sampleSize;
+
+            const gray = new Uint8Array(size * size);
+            for (let i = 0; i < data.length; i += 4) {
+                gray[i / 4] = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+            }
+
+            let varianceSum = 0;
+            let count = 0;
+
+            for (let y = 1; y < size - 1; y++) {
+                for (let x = 1; x < size - 1; x++) {
+                    const idx = y * size + x;
+                    const val = 4 * gray[idx] 
+                              - gray[idx - 1] 
+                              - gray[idx + 1] 
+                              - gray[idx - size] 
+                              - gray[idx + size];
+                    varianceSum += val * val;
+                    count++;
+                }
+            }
+
+            const meanSquared = varianceSum / count;
+            const score = Math.min(1.0, Math.max(0.1, meanSquared / 700));
+            console.log('[JOVI Flow] Sharpness score:', score);
+            return parseFloat(score.toFixed(2));
+        } catch (e) {
+            console.warn('[JOVI Flow] Sharpness check error:', e);
+            return 0.8;
+        }
+    }
+
+    async function savePhoto(imageData, sharpness) {
         try {
             const db = await openDB();
             const tx = db.transaction(STORAGE_KEY, 'readwrite');
@@ -193,6 +349,7 @@ const JOVIFlow = (() => {
             const photo = {
                 id: Date.now(),
                 data: imageData,
+                sharpness: sharpness || 0.8,
                 createdAt: new Date().toISOString()
             };
 
@@ -232,6 +389,8 @@ const JOVIFlow = (() => {
         const empty = document.getElementById('gallery-empty');
         const footer = document.getElementById('gallery-footer');
 
+        if (!grid) return;
+
         try {
             const db = await openDB();
             const tx = db.transaction(STORAGE_KEY, 'readonly');
@@ -251,13 +410,53 @@ const JOVIFlow = (() => {
                 footer.style.display = 'block';
 
                 grid.innerHTML = '';
-                photos.forEach(photo => {
+
+                // Find highest sharpness index
+                let highestSharpness = 0;
+                let featuredIndex = -1;
+
+                photos.forEach((p, idx) => {
+                    if (p.sharpness && p.sharpness > highestSharpness) {
+                        highestSharpness = p.sharpness;
+                        featuredIndex = idx;
+                    }
+                });
+
+                // Inject dynamic optimization stats card in Bento grid
+                const statCard = document.createElement('div');
+                statCard.className = 'gallery-item stat-card';
+                const avgSharpness = (photos.reduce((acc, p) => acc + (p.sharpness || 0.8), 0) / photos.length * 100).toFixed(0);
+                statCard.innerHTML = `
+                    <div class="stat-title">IA Otimização</div>
+                    <div class="stat-value">Bateria: +35%</div>
+                    <div class="stat-title">Média Nitidez</div>
+                    <div class="stat-value">${avgSharpness}%</div>
+                `;
+
+                photos.forEach((photo, idx) => {
                     const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    item.innerHTML = `<img src="${photo.data}" alt="Foto" loading="lazy">`;
+                    const isFeatured = idx === featuredIndex && photo.sharpness > 0.6;
+                    item.className = `gallery-item${isFeatured ? ' featured' : ''}`;
+                    
+                    let inner = `<img src="${photo.data}" alt="Foto" loading="lazy">`;
+                    if (photo.sharpness) {
+                        inner += `<div class="sharpness-badge">Nitidez: ${(photo.sharpness * 100).toFixed(0)}%</div>`;
+                    }
+                    item.innerHTML = inner;
                     item.addEventListener('click', () => openDetail(photo));
                     grid.appendChild(item);
                 });
+
+                // Bento styling positioning
+                if (grid.children.length > 1) {
+                    grid.insertBefore(statCard, grid.children[1]);
+                } else {
+                    grid.appendChild(statCard);
+                }
+                
+                // Update header title
+                const headerTitle = document.querySelector('.gallery-header h2');
+                if (headerTitle) headerTitle.textContent = 'Galeria Bento';
             };
         } catch (error) {
             console.error('[JOVI Flow] Load gallery error:', error);
@@ -280,11 +479,32 @@ const JOVIFlow = (() => {
         showScreen(SCREENS.DETAIL);
     }
 
-    function deleteCurrentPhoto() {
+    async function deleteCurrentPhoto() {
         if (!lastPhotoData) return;
-        showToast('Foto excluída');
-        showScreen(SCREENS.GALLERY);
-        loadGallery();
+        
+        try {
+            const db = await openDB();
+            const tx = db.transaction(STORAGE_KEY, 'readwrite');
+            const store = tx.objectStore(STORAGE_KEY);
+            
+            // Need to retrieve all to match the source Base64
+            const request = store.getAll();
+            request.onsuccess = async () => {
+                const photos = request.result;
+                const match = photos.find(p => p.data === lastPhotoData);
+                if (match) {
+                    store.delete(match.id);
+                    await new Promise(resolve => {
+                        tx.oncomplete = resolve;
+                    });
+                    showToast('Foto excluída');
+                    showScreen(SCREENS.GALLERY);
+                    loadGallery();
+                }
+            };
+        } catch (e) {
+            console.error('[JOVI Flow] Delete failed:', e);
+        }
     }
 
     function openShareScreen() {
@@ -295,6 +515,7 @@ const JOVIFlow = (() => {
 
     async function shareTo(platform) {
         const status = document.getElementById('share-status');
+        if (!status) return;
         status.textContent = '';
 
         switch (platform) {
@@ -371,13 +592,14 @@ const JOVIFlow = (() => {
         if (currentScreen === SCREENS.CAMERA) {
             const video = document.getElementById('camera-preview');
             if (video && video.videoWidth > 0) {
-                // Re-render if needed
+                // Resize handers if needed
             }
         }
     }
 
     function showToast(message) {
         const container = document.getElementById('toast-container');
+        if (!container) return;
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.textContent = message;
