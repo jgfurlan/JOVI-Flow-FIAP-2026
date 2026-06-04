@@ -32,13 +32,15 @@ jobs:
         run: npx stylelint "src/**/css/jovi.css" --allow-empty-input
 
       - name: ESLint (app.js)
-        run: npx eslint "src/**/js/app.js" --allow-empty-input
+        run: npx eslint "src/**/js/app.js" --no-error-on-unmatched-pattern
 
   # ── Security Scan ──────────────────────────────────────
   sast:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
