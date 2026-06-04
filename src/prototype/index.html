@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JOVI Flow Prototype</title>
+    <link href="css/jovi.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Screen 1: Camera -->
+        <section id="screen-camera" class="screen screen-camera active">
+            <div class="camera-viewfinder">
+                <div class="camera-overlay">
+                    <div class="aura-ring-indicator"></div>
+                    <div class="aura-glow-effect"></div>
+                </div>
+                <div class="top-bar">
+                    <button class="btn-icon">⚡</button>
+                    <button class="btn-icon">⚙️</button>
+                </div>
+            </div>
+            <div class="camera-controls">
+                <div class="capture-area">
+                    <button id="btn-capture" class="btn-capture"></button>
+                </div>
+                <div class="bottom-bar" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div id="btn-gallery-thumb" style="width: 44px; height: 44px; background: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100') center/cover; border-radius: 12px; border: 2px solid white;"></div>
+                    <button class="btn-icon">🔄</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screen 2: Gallery -->
+        <section id="screen-gallery" class="screen screen-gallery">
+            <header class="gallery-header">
+                <button id="btn-back-camera" class="btn-icon" style="background: none; color: black; font-size: 1.5rem;">←</button>
+                <h2>Galeria Inteligente</h2>
+                <button style="background: none; border: none; color: var(--jovi-blue); font-weight: 600;">Editar</button>
+            </header>
+            <div class="gallery-grid">
+                <!-- Placeholder images to look like a real gallery -->
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300') center/cover;"></div>
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1520390138845-fd2d229dd553?w=300') center/cover;"></div>
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1554080353-a576cf803bda?w=300') center/cover;"></div>
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300') center/cover;"></div>
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1493863641943-9b68992a8d07?w=300') center/cover;"></div>
+                <div class="gallery-item" style="background: url('https://images.unsplash.com/photo-1444464666168-49d633b867ad?w=300') center/cover;"></div>
+            </div>
+            <footer style="padding: 1.5rem;">
+                <button id="btn-share" class="btn-primary" style="width: 100%;">Selecionar e Compartilhar</button>
+            </footer>
+        </section>
+
+        <!-- Screen 3: Share -->
+        <section id="screen-share" class="screen screen-share">
+            <header class="gallery-header">
+                <button id="btn-back-gallery" class="btn-icon" style="background: none; color: black; font-size: 1.5rem;">←</button>
+                <h2>Compartilhar</h2>
+                <div style="width: 44px;"></div>
+            </header>
+            <div class="share-content">
+                <div class="share-preview">
+                    <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600" alt="Preview" style="width: 100%; display: block;">
+                </div>
+                <p style="margin-bottom: 2rem; color: var(--gray-700); font-weight: 500;">Compartilhar em um toque</p>
+                <div class="share-options">
+                    <button class="share-btn">
+                        <div class="share-icon" style="background: #25D366; color: white;">W</div>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button class="share-btn">
+                        <div class="share-icon" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white;">I</div>
+                        <span>Instagram</span>
+                    </button>
+                    <button class="share-btn">
+                        <div class="share-icon" style="background: #E1E1E1;">...</div>
+                        <span>Mais</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Simple navigation for prototype screenshots
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + id).classList.add('active');
+        }
+
+        document.getElementById('btn-capture').onclick = () => showScreen('gallery');
+        document.getElementById('btn-gallery-thumb').onclick = () => showScreen('gallery');
+        document.getElementById('btn-back-camera').onclick = () => showScreen('camera');
+        document.getElementById('btn-share').onclick = () => showScreen('share');
+        document.getElementById('btn-back-gallery').onclick = () => showScreen('gallery');
+    </script>
+</body>
+</html>

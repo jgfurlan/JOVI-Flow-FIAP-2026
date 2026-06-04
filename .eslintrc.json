@@ -1,0 +1,14 @@
+{
+  "env": { "browser": true, "es2022": true },
+  "parserOptions": { "ecmaVersion": 2022, "sourceType": "script" },
+  "globals": {
+    "ClipboardItem": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "no-console": "off",
+    "semi": ["error", "always"],
+    "no-trailing-spaces": "error",
+    "no-multiple-empty-lines": ["error", { "max": 2 }]
+  }
+}

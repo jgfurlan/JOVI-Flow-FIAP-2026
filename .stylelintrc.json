@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "no-empty-source": null,
+    "comment-empty-line-before": null,
+    "custom-property-empty-line-before": null,
+    "no-descending-specificity": null,
+    "property-no-vendor-prefix": null,
+    "value-no-vendor-prefix": null,
+    "selector-class-pattern": null,
+    "selector-pseudo-class-no-unknown": true,
+    "block-no-empty": true,
+    "declaration-block-no-duplicate-properties": true,
+    "no-duplicate-selectors": true,
+    "color-hex-length": "short"
+  }
+}

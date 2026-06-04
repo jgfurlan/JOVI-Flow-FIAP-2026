@@ -5,8 +5,8 @@
 **Sprint 2:** Front-end HTML/CSS/JS implementation (May - Sep 2026).
 
 ## Active Implementation
-- **Current Task:** JOVI-103 UI Refinement & Interaction Design (spec written & approved).
-- **Status:** Design spec committed to `docs/superpowers/specs/2026-05-21-jovi-ui-refinement-design.md`.
+- **Current Task:** JOVI-103 UI Refinement — **DONE** (committed to `develop`).
+- **Status:** Liquid Glass viewfinder, Aura Ring shutter gestures, Bento gallery, View Transitions all implemented.
 
 ## Completed Features
 - ✅ JOVI-101 Negócio (Validated dores and benchmarks).

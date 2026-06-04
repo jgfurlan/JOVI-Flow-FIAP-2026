@@ -1,0 +1,264 @@
+/* JOVI Flow – High Fidelity Prototype CSS */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* JOVI Premium Brand Colors */
+    --jovi-blue: #0047FF;
+    --jovi-blue-light: #4D8BFF;
+    --jovi-blue-dark: #0036C2;
+    --jovi-accent: #FFF;
+    --aura-glow: rgba(255, 255, 255, 0.4);
+    
+    /* Neutrals */
+    --black: #000;
+    --gray-900: #0A0A0A;
+    --gray-800: #1A1A1A;
+    --gray-700: #333;
+    --gray-100: #F5F5F7;
+    --white: #FFF;
+
+    /* Semantic */
+    --color-bg: var(--gray-100);
+    --color-surface: var(--white);
+    --color-text: var(--gray-900);
+    --color-text-on-dark: var(--white);
+    --color-primary: var(--jovi-blue);
+    
+    /* Typography */
+    --font-family: 'Poppins', -apple-system, sans-serif;
+    
+    /* Spacing */
+    --space-4: 1rem;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    background: var(--black);
+    color: var(--white);
+    height: 100%;
+    overflow: hidden;
+}
+
+#app {
+    max-width: 428px; /* iPhone 13/14/15 Pro Max width */
+    margin: 0 auto;
+    height: 100dvh;
+    position: relative;
+    background: var(--black);
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+}
+
+.screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* 1. Camera Screen (High Fidelity) */
+.screen-camera {
+    background: var(--black);
+}
+
+.camera-viewfinder {
+    flex: 1;
+    position: relative;
+    background: var(--gray-900);
+}
+
+.camera-overlay {
+    position: absolute;
+    inset: 0;
+    border: 2px solid rgba(255,255,255,0.1);
+    pointer-events: none;
+}
+
+/* Aura Light UI */
+.aura-ring-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 280px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+}
+
+.aura-glow-effect {
+    position: absolute;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 100px;
+    background: radial-gradient(ellipse at bottom, var(--aura-glow) 0%, transparent 70%);
+    filter: blur(20px);
+}
+
+/* Controls */
+.camera-controls {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.top-bar {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    right: 0;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.capture-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-capture {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 6px solid rgba(255,255,255,0.3);
+    padding: 0;
+    cursor: pointer;
+}
+
+.btn-capture:active {
+    transform: scale(0.9);
+}
+
+/* 2. Gallery Screen */
+.screen-gallery {
+    background: var(--white);
+    color: var(--black);
+}
+
+.gallery-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gallery-header h2 {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.gallery-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 2px;
+    overflow-y: auto;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    background: var(--gray-100);
+}
+
+/* 3. Share Screen */
+.screen-share {
+    background: var(--white);
+    color: var(--black);
+}
+
+.share-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.share-preview {
+    width: 100%;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.share-options {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.share-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.share-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Buttons & Elements */
+.btn-primary {
+    background: var(--jovi-blue);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.btn-icon {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.active {
+    animation: fadeIn 0.4s ease-out;
+}

@@ -1,0 +1,70 @@
+name: JOVI Flow CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Lint & Validate ────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install linters
+        run: |
+          npm install -g htmlhint stylelint eslint@8
+
+      - name: HTMLHint
+        run: htmlhint src/poc/index.html src/prototype/index.html
+
+      - name: Stylelint (jovi.css)
+        run: npx stylelint "src/**/css/jovi.css" --allow-empty-input
+
+      - name: ESLint (app.js)
+        run: npx eslint "src/**/js/app.js" --allow-empty-input
+
+  # ── Security Scan ──────────────────────────────────────
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Deploy POC to GitHub Pages ──────────────────────────
+  deploy:
+    needs: [lint, sast]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/poc
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
