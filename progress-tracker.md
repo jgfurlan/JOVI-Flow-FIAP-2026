@@ -25,7 +25,7 @@
 2. `JOVI-103.2` Viewfinder Shutter Aura Ring gesture control
 3. `JOVI-103.3` Bento Gallery CSS Grid layout implementation
 4. `JOVI-103.4` View Transitions API screen navigation
-5. `JOVI-105` QA Mobile-First testing checklist and bugfixes
+5. `JOVI-105` QA Mobile-First testing checklist and bugfixes (Done)
 6. `JOVI-106.1` Human Review & final release
 
 ## Session Restoration Point
