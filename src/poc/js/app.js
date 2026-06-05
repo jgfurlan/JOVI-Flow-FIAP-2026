@@ -27,21 +27,29 @@ const JOVIFlow = (() => {
     const STORAGE_KEY = 'jovi-flow-media';
 
     async function init() {
-        console.log('[JOVI Flow] Initializing...');
-        bindEvents();
-        await loadGallery();
-        showScreen(SCREENS.SPLASH);
+        try {
+            console.log('[JOVI Flow] Initializing...');
+            bindEvents();
+            
+            // Do not await loadGallery so it doesn't block the UI if DB hangs
+            loadGallery().catch(e => console.error('[JOVI Flow] loadGallery error:', e));
+            
+            showScreen(SCREENS.SPLASH);
 
-        if (window.location.protocol === 'file:') {
-            showToast('Aviso: Câmera requer Servidor HTTP (localhost)');
-        }
-
-        setTimeout(() => {
-            if (window.location.protocol !== 'file:') {
-                showScreen(SCREENS.CAMERA);
-                startCamera();
+            if (window.location.protocol === 'file:') {
+                showToast('Aviso: Câmera requer Servidor HTTP (localhost)');
             }
-        }, 2000);
+
+            setTimeout(() => {
+                if (window.location.protocol !== 'file:') {
+                    showScreen(SCREENS.CAMERA);
+                    startCamera();
+                }
+            }, 2000);
+        } catch (error) {
+            alert("Init error: " + error.message);
+            console.error(error);
+        }
     }
 
     function bindEvents() {
