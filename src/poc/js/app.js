@@ -30,10 +30,10 @@ const JOVIFlow = (() => {
         try {
             console.log('[JOVI Flow] Initializing...');
             bindEvents();
-            
+
             // Do not await loadGallery so it doesn't block the UI if DB hangs
             loadGallery().catch(e => console.error('[JOVI Flow] loadGallery error:', e));
-            
+
             showScreen(SCREENS.SPLASH);
 
             if (window.location.protocol === 'file:') {
