@@ -80,6 +80,13 @@ const JOVIFlow = (() => {
                 }
                 currentTemperature = newTemp;
                 updateAuraLightTemperature(currentTemperature);
+
+                // Rotate the dial visually
+                const ring = btnCapture.querySelector('.capture-ring');
+                if (ring) {
+                    const rotation = ((currentTemperature - 5000) / 5000) * 180;
+                    ring.style.transform = `rotate(${rotation}deg)`;
+                }
             });
 
             btnCapture.addEventListener('pointerup', (e) => {
