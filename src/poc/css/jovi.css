@@ -248,16 +248,26 @@ html, body {
     pointer-events: none; /* Let clicks pass through to viewfinder gestures */
 }
 
-.top-bar, .bottom-bar {
+.top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    pointer-events: auto; /* Enable clicks on buttons */
+    pointer-events: auto;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border: var(--glass-border);
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-xl);
+}
+
+.bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    width: 100%;
+    padding: 0 var(--space-2);
+    margin-bottom: var(--space-2);
 }
 
 .fps-counter {
