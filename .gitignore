@@ -6,3 +6,4 @@ AGENTS.md
 .superpowers/
 .pi/
 graphify-out/
+node_modules/
