@@ -146,7 +146,11 @@ const JOVIFlow = (() => {
         };
 
         if (document.startViewTransition) {
-            document.startViewTransition(performTransition);
+            document.documentElement.classList.add('view-transitioning');
+            const transition = document.startViewTransition(performTransition);
+            transition.finished.finally(() => {
+                document.documentElement.classList.remove('view-transitioning');
+            });
         } else {
             performTransition();
         }
@@ -492,6 +496,15 @@ const JOVIFlow = (() => {
         lastPhotoData = photo.data;
         document.getElementById('detail-image').src = photo.data;
         document.getElementById('detail-date').textContent = formatDate(photo.createdAt);
+
+        // Dynamically assign view-transition-name to the clicked item
+        document.querySelectorAll('.gallery-item img').forEach(img => {
+            img.style.viewTransitionName = 'none';
+            if (img.src === photo.data) {
+                img.style.viewTransitionName = 'detail-photo';
+            }
+        });
+
         showScreen(SCREENS.DETAIL);
     }
 

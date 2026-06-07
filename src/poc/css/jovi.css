@@ -733,9 +733,11 @@ html, body {
 
 /* View Transitions API (JOVI-103.4) */
 
-/* Disable old CSS transition if View Transitions are supported */
-@supports (view-transition-name: none) {
-    .screen {
-        transition: none !important;
-    }
+/* Disable old CSS transition only when View Transition is actively running */
+html.view-transitioning .screen {
+    transition: none !important;
+}
+
+#detail-image {
+    view-transition-name: detail-photo;
 }
