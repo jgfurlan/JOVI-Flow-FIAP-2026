@@ -19,6 +19,7 @@
 - **2026-04-16:** Standardized on Bootstrap 5.3.3 + Vanilla JS to eliminate bundle overhead.
 - **2026-05-20:** Compiled all Sprint 1 assets into `jovi-flow-sprint1.pdf` for submission.
 - **2026-05-21:** Enforced spec-driven workflow using `superpowers:brainstorming` and adapted system-level guideline templates.
+- **2026-06-07:** Resolved blocking View Transition UI bug (JOVI-106) using a combination of `graphify` architectural tracing and the `superpowers:systematic-debugging` mandate. **Lesson Learned:** Tracing DOM state (like `visibility: hidden` retaining layout boxes) via Graphify prevents blind patching. Always prove root cause (e.g., uniqueness collision on `.active` states) before writing imperative JS workarounds.
 
 ## Feature Queue (GitLab Issues)
 1. `JOVI-103.1` Design System Refinements (css/jovi.css update)
