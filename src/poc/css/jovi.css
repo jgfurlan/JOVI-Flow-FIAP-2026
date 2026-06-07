@@ -399,6 +399,7 @@ html, body {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 120px;
+    grid-auto-flow: dense;
     gap: var(--space-3);
 }
 
@@ -731,30 +732,6 @@ html, body {
 }
 
 /* View Transitions API (JOVI-103.4) */
-
-::view-transition-old(gallery-card) {
-    animation: fade-out 0.2s ease;
-}
-
-::view-transition-new(gallery-card) {
-    animation: scale-up 0.2s ease;
-}
-
-@keyframes fade-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
-
-@keyframes scale-up {
-    from { 
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to { 
-        opacity: 1;
-        transform: scale(1);
-    }
-}
 
 /* Disable old CSS transition if View Transitions are supported */
 @supports (view-transition-name: none) {
