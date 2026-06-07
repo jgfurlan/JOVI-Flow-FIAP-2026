@@ -497,11 +497,11 @@ const JOVIFlow = (() => {
         document.getElementById('detail-image').src = photo.data;
         document.getElementById('detail-date').textContent = formatDate(photo.createdAt);
 
-        // Dynamically assign view-transition-name to the clicked item
+        // Dynamically assign view-transition-name class to the clicked item
         document.querySelectorAll('.gallery-item img').forEach(img => {
-            img.style.viewTransitionName = 'none';
+            img.classList.remove('transition-active');
             if (img.src === photo.data) {
-                img.style.viewTransitionName = 'detail-photo';
+                img.classList.add('transition-active');
             }
         });
 
