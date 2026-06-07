@@ -727,3 +727,43 @@ html, body {
     background-color: var(--jovi-blue-light);
     box-shadow: 0 0 10px var(--jovi-blue-light);
 }
+
+/* View Transitions API (JOVI-103.4) */
+.btn-gallery-thumb {
+    view-transition-name: gallery-card;
+}
+
+.screen-gallery {
+    view-transition-name: gallery-card;
+}
+
+::view-transition-old(gallery-card) {
+    animation: fade-out 0.2s ease;
+}
+
+::view-transition-new(gallery-card) {
+    animation: scale-up 0.2s ease;
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes scale-up {
+    from { 
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Disable old CSS transition if View Transitions are supported */
+@supports (view-transition-name: none) {
+    .screen {
+        transition: none !important;
+    }
+}
