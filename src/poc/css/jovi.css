@@ -334,6 +334,9 @@ html, body {
     border: 2px solid var(--white);
     overflow: hidden;
     cursor: pointer;
+}
+
+.screen-camera.active .btn-gallery-thumb {
     view-transition-name: gallery-card;
 }
 
@@ -365,6 +368,9 @@ html, body {
 /* Gallery Screen */
 .screen-gallery {
     background: var(--color-surface);
+}
+
+.screen-gallery.active {
     view-transition-name: gallery-card;
 }
 
@@ -738,6 +744,10 @@ html.view-transitioning .screen {
     transition: none !important;
 }
 
-#detail-image {
+.screen-detail.active #detail-image {
+    view-transition-name: detail-photo;
+}
+
+.screen-gallery.active .gallery-item img.transition-active {
     view-transition-name: detail-photo;
 }
