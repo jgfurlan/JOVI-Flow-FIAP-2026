@@ -284,6 +284,7 @@ const JOVIFlow = (() => {
             captureBtn.disabled = false;
             showToast('Foto salva!');
             updateGalleryThumbnail(imageData);
+            loadGallery();
         }, 300);
     }
 
@@ -450,7 +451,7 @@ const JOVIFlow = (() => {
 
                 photos.forEach((photo, idx) => {
                     const item = document.createElement('div');
-                    const isFeatured = idx === featuredIndex && photo.sharpness > 0.6;
+                    const isFeatured = idx === featuredIndex;
                     item.className = `gallery-item${isFeatured ? ' featured' : ''}`;
 
                     let inner = `<img src="${photo.data}" alt="Foto" loading="lazy">`;
