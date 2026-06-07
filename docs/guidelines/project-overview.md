@@ -14,6 +14,12 @@ Develop JOVI Flow: a state-of-the-art camera web application that works in 3 tou
 - **Micro-interactions:** Interactive elements have a minimum touch target of 44x44px with vibration haptic feedback.
 - **Brand Consistency:** Strictly follows the JOVI design system (Blue #0A3DFF, Yellow #FFD600, Poppins font).
 
+## Project Governance
+- **Linear Project Sync:** [jovi-flow-camera-app-3191a50a0b5c](https://linear.app/jgfurlan/project/jovi-flow-camera-app-3191a50a0b5c/overview)
+- All new features MUST be logged as atomic specs in `docs/specs/`.
+- Commits must follow linear syncing `[issue-id] feat: description`.
+- Merges to `main` auto-deploy to GitHub Pages.
+
 ## Out-of-Scope (Sprint 1 & 2)
 - Cloud storage/hosting backend integration (local IndexedDB is the database).
 - Social login authentication (local sandbox execution).
