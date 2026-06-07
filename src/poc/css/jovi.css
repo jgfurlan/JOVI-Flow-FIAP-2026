@@ -334,11 +334,9 @@ html, body {
     border: 2px solid var(--white);
     overflow: hidden;
     cursor: pointer;
+  /* view-transition-name: assigned dynamically in JS */
 }
 
-.btn-gallery-thumb {
-    /* view-transition-name: assigned dynamically in JS */
-}
 
 .thumbnail-placeholder {
     width: 100%;
@@ -368,11 +366,9 @@ html, body {
 /* Gallery Screen */
 .screen-gallery {
     background: var(--color-surface);
+  /* view-transition-name: assigned dynamically in JS */
 }
 
-.screen-gallery {
-    /* view-transition-name: assigned dynamically in JS */
-}
 
 .gallery-header {
     display: flex;
