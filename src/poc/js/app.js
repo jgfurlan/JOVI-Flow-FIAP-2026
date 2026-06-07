@@ -133,28 +133,56 @@ const JOVIFlow = (() => {
     }
 
     function showScreen(screenId) {
-        const performTransition = () => {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            const screen = document.getElementById(`screen-${screenId}`);
-            if (screen) {
-                screen.classList.add('active');
-                currentScreen = screenId;
-                console.log(`[JOVI Flow] Screen: ${screenId}`);
-            }
-        };
+ // Assign gallery-card transition names before transition starts
+ // This enables the thumbnail <-> gallery morphing animation
+ const isGalleryTransition = (screenId === SCREENS.GALLERY && currentScreen === SCREENS.CAMERA)
+  || (screenId === SCREENS.CAMERA && currentScreen === SCREENS.GALLERY);
+ if (isGalleryTransition) {
+  const thumb = document.querySelector('.btn-gallery-thumb');
+  const gallery = document.querySelector('.screen-gallery');
+  if (thumb) thumb.style.viewTransitionName = 'gallery-card';
+  if (gallery) gallery.style.viewTransitionName = 'gallery-card';
+ }
 
-        if (document.startViewTransition) {
-            document.documentElement.classList.add('view-transitioning');
-            const transition = document.startViewTransition(performTransition);
-            transition.finished.finally(() => {
-                document.documentElement.classList.remove('view-transitioning');
-            });
-        } else {
-            performTransition();
-        }
-    }
+ const performTransition = () => {
+  document.querySelectorAll('.screen').forEach(screen => {
+   screen.classList.remove('active');
+  });
+  const screen = document.getElementById(`screen-${screenId}`);
+  if (screen) {
+   screen.classList.add('active');
+   currentScreen = screenId;
+   console.log(`[JOVI Flow] Screen: ${screenId}`);
+  }
+ };
+
+ if (document.startViewTransition) {
+  document.documentElement.classList.add('view-transitioning');
+  const transition = document.startViewTransition(performTransition);
+  transition.finished.finally(() => {
+   document.documentElement.classList.remove('view-transitioning');
+   // Clean up transition names after animation completes
+   document.querySelectorAll('.transition-active').forEach(el => {
+    el.classList.remove('transition-active');
+   });
+   // Clean up dynamically assigned gallery-card names
+   const thumb = document.querySelector('.btn-gallery-thumb');
+   const gallery = document.querySelector('.screen-gallery');
+   if (thumb) thumb.style.viewTransitionName = '';
+   if (gallery) gallery.style.viewTransitionName = '';
+  });
+ } else {
+  performTransition();
+  // Fallback: still clean up transition names
+  document.querySelectorAll('.transition-active').forEach(el => {
+   el.classList.remove('transition-active');
+  });
+  const thumb = document.querySelector('.btn-gallery-thumb');
+  const gallery = document.querySelector('.screen-gallery');
+  if (thumb) thumb.style.viewTransitionName = '';
+  if (gallery) gallery.style.viewTransitionName = '';
+ }
+}
 
     async function startCamera() {
         const video = document.getElementById('camera-preview');
@@ -497,7 +525,8 @@ const JOVIFlow = (() => {
         document.getElementById('detail-image').src = photo.data;
         document.getElementById('detail-date').textContent = formatDate(photo.createdAt);
 
-        // Dynamically assign view-transition-name class to the clicked item
+        // Assign view-transition-name to the clicked gallery image BEFORE transition
+  // This must happen before showScreen() so the old state is captured with the name
         document.querySelectorAll('.gallery-item img').forEach(img => {
             img.classList.remove('transition-active');
             if (img.src === photo.data) {

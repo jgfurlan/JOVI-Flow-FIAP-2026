@@ -336,8 +336,8 @@ html, body {
     cursor: pointer;
 }
 
-.screen-camera.active .btn-gallery-thumb {
-    view-transition-name: gallery-card;
+.btn-gallery-thumb {
+    /* view-transition-name: assigned dynamically in JS */
 }
 
 .thumbnail-placeholder {
@@ -370,8 +370,8 @@ html, body {
     background: var(--color-surface);
 }
 
-.screen-gallery.active {
-    view-transition-name: gallery-card;
+.screen-gallery {
+    /* view-transition-name: assigned dynamically in JS */
 }
 
 .gallery-header {
@@ -748,6 +748,6 @@ html.view-transitioning .screen {
     view-transition-name: detail-photo;
 }
 
-.screen-gallery.active .gallery-item img.transition-active {
+.gallery-item img.transition-active {
     view-transition-name: detail-photo;
 }
