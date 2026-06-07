@@ -334,6 +334,7 @@ html, body {
     border: 2px solid var(--white);
     overflow: hidden;
     cursor: pointer;
+    view-transition-name: gallery-card;
 }
 
 .thumbnail-placeholder {
@@ -364,6 +365,7 @@ html, body {
 /* Gallery Screen */
 .screen-gallery {
     background: var(--color-surface);
+    view-transition-name: gallery-card;
 }
 
 .gallery-header {
@@ -729,13 +731,6 @@ html, body {
 }
 
 /* View Transitions API (JOVI-103.4) */
-.btn-gallery-thumb {
-    view-transition-name: gallery-card;
-}
-
-.screen-gallery {
-    view-transition-name: gallery-card;
-}
 
 ::view-transition-old(gallery-card) {
     animation: fade-out 0.2s ease;
