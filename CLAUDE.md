@@ -18,16 +18,15 @@ Before taking action, you MUST verify context against these sources:
 ### 1. Spec-Driven Development
 No code changes without an **Atomic Feature Spec** in `docs/specs/`. Use `enter_plan_mode` to draft specs.
 
-### 2. Mandatory Linear-GitHub Sync (Professional Observability)
-Every task is a professional deliverable. Maintain a perfect audit trail for external visibility:
-- **Zero Drift:** Every GitHub branch MUST link to a Linear issue.
-- **Branch Naming:** `<issue-id>-<short-description>` (e.g., `ABC-12-feat-x`).
-- **Commit Mandate:** Every commit message MUST start with `[issue-id]`.
-- **State Automation:** 
-    - Move to **"In Progress"** when research ends and implementation starts.
-    - Move to **"In Review"** when PR is ready or verification starts.
-    - Move to **"Done"** only after successful `verification-before-completion`.
-- **Linkage:** Paste the GitHub PR/Commit URL into the Linear issue comment upon completion.
+### 2. ClickUp-GitHub Sync (Observability)
+Solo project — keep the cheap audit trail, skip the ceremony. Full rules: `docs/guidelines/ai-workflow-rules.md`.
+- **Zero Drift (required):** Every branch links to exactly one ClickUp task.
+- **Task IDs:** ClickUp Custom Task IDs, `JOVI-` prefix (e.g., `JOVI-108`).
+- **Branch Naming:** `<task-id>-<short-description>` (e.g., `JOVI-108-local-asset-vendoring`).
+- **Commit Mandate:** Every commit message MUST start with `[task-id]`.
+- **Status:** `in progress` when implementation starts → `complete` after successful `verification-before-completion`.
+- **Optional (solo):** `in review` status, PRs, pasting PR/commit URLs, milestone comments.
+  Plan mode is the review gate.
 
 ### 3. Context Efficiency
 - Prefer `grep_search` and `glob` over large `read_file` calls.

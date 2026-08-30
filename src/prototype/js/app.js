@@ -10,6 +10,7 @@ const JOVIFlow = (() => {
     let fpsHistory = [];
     let animationFrameId = null;
 
+
     const SCREENS = {
         SPLASH: 'splash',
         CAMERA: 'camera',
