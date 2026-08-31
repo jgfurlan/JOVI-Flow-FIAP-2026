@@ -41,9 +41,16 @@ Use the `superpowers` framework for implementation tasks.
   assert (see `code-standards.md` "Testing Standards").
 - **Verification:** use the `verification-before-completion` skill before claiming success.
 
+## Branching Model
+**Trunk-based.** `main` is the only long-lived branch — it is the GitHub default, the sole CI
+push trigger, and the Pages deploy source. Feature work happens on short-lived
+`<task-id>-<slug>` branches merged back to `main` (PR optional, solo). There is **no `develop`
+branch** — it was retired 2026-08-31 after repeatedly drifting behind `main` and breaking
+dependabot CI. Dependabot targets `main` explicitly (`.github/dependabot.yml`).
+(A GitLab remote exists as a legacy mirror; older history uses `[#nn]` GitLab issue refs.)
+
 ## ClickUp-GitHub Synchronization
 ClickUp = source of truth for project state. GitHub = source of truth for code.
-(A GitLab remote exists as a legacy mirror; older history uses `[#nn]` GitLab issue refs.)
 
 **Required (cheap, keeps the audit trail):**
 1. **Task Mapping:** every branch corresponds to exactly one ClickUp task.
