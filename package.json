@@ -9,6 +9,6 @@
   "devDependencies": {
     "@fontsource/poppins": "^5.3.0",
     "@tailwindcss/cli": "4.3.3",
-    "puppeteer": "^25.1.0"
+    "puppeteer": "^25.8.0"
   }
 }
