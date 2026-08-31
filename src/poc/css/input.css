@@ -1,0 +1,763 @@
+/* =========================================================================
+   JOVI Flow — Tailwind v4 source stylesheet
+   -------------------------------------------------------------------------
+   EDIT THIS FILE. The shipped stylesheet `jovi.css` is GENERATED:
+       npm run css      (tools/tailwindcss -i css/input.css -o css/jovi.css --minify)
+
+   Hybrid model:
+   - Tailwind utilities in markup carry layout / spacing / type / colour.
+   - @theme below defines the JOVI design tokens (also usable as CSS vars).
+   - @layer components keeps the signature effects that utilities cannot
+     express: Liquid Glass surfaces, the Aura dial, bento spans, the
+     performance Spark, View Transitions, toasts, skeletons.
+   ========================================================================= */
+
+/* Scan only the shipped app for utility classes — not docs/ or src/prototype/. */
+@import "tailwindcss" source("..");
+
+/* ---- Design tokens -------------------------------------------------------- */
+@theme {
+  /* Brand */
+  --color-jovi-blue: #0a3dff;
+  --color-jovi-blue-light: #3d6fff;
+  --color-jovi-blue-dark: #0728cc;
+  --color-jovi-yellow: #ffd600;
+  --color-jovi-yellow-light: #ffdf33;
+  --color-jovi-yellow-dark: #ccab00;
+
+  /* Neutrals */
+  --color-ink-900: #1a1a1a;
+  --color-ink-700: #333;
+  --color-ink-500: #666;
+  --color-ink-300: #ccc;
+  --color-ink-100: #f5f5f5;
+
+  /* Semantic surfaces */
+  --color-canvas: #f5f5f5;
+  --color-surface: #fff;
+  --color-body: #1a1a1a;
+  --color-muted: #666;
+
+  /* Status */
+  --color-error: #ff3b30;
+  --color-success: #34c759;
+
+  /* Typography */
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.1);
+}
+
+/* ---- Base -------------------------------------------------------------- */
+@layer base {
+  @font-face {
+    font-family: "Poppins";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../assets/fonts/poppins-400.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Poppins";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("../assets/fonts/poppins-500.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Poppins";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("../assets/fonts/poppins-600.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Poppins";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../assets/fonts/poppins-700.woff2") format("woff2");
+  }
+
+  :root {
+    /* Non-utility tokens used only inside @layer components */
+    --touch-target: 44px;
+    --glass-bg: rgb(255 255 255 / 0.1);
+    --glass-scrim: color-mix(in srgb, black 22%, transparent);
+    --glass-blur: blur(12px) saturate(140%);
+    --glass-border: 1px solid rgb(255 255 255 / 0.22);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    background: var(--color-canvas);
+    color: var(--color-body);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* ---- Components & signature effects ---------------------------------- */
+@layer components {
+  #app {
+    width: 100vw;
+    height: 100dvh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Screens ---------------------------------------------------------------- */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .screen.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Splash -------------------------------------------------------------- */
+  .screen-splash {
+    background: linear-gradient(135deg, var(--color-jovi-blue) 0%, var(--color-jovi-blue-dark) 100%);
+    justify-content: center;
+    align-items: center;
+  }
+  .splash-content {
+    text-align: center;
+    color: #fff;
+  }
+  .logo-container {
+    margin-bottom: 2rem;
+  }
+  .logo-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--color-jovi-yellow);
+    border-radius: var(--radius-xl);
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-icon::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    background: var(--color-jovi-blue);
+    border-radius: 50%;
+  }
+  .brand {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.1em;
+  }
+  .tagline {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0.25rem 0 0;
+    opacity: 0.9;
+  }
+  .loading-indicator {
+    margin-bottom: 1.5rem;
+  }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgb(255 255 255 / 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+  }
+  .splash-hint {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  /* Camera ------------------------------------------------------------- */
+  .screen-camera {
+    background: var(--color-ink-900);
+  }
+  .camera-viewfinder {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #camera-preview,
+  #demo-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .camera-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .aura-light-effect {
+    position: absolute;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgb(255 214 0 / 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .aura-light-effect.active {
+    opacity: 1;
+    animation: aura-pulse 1.5s ease-in-out infinite;
+  }
+
+  .camera-controls {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    pointer-events: none;
+  }
+
+  /* Liquid Glass surface: scrim layer under a blurred translucent layer,
+     hairline border + inner highlight. Scrim guarantees contrast when the
+     viewfinder behind is bright. */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    background: linear-gradient(var(--glass-scrim), var(--glass-scrim)), var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), var(--shadow-md);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-xl);
+  }
+  .bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    width: 100%;
+    padding: 0 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .fps-counter {
+    font-size: 0.75rem;
+    color: #fff;
+    background: rgb(0 0 0 / 0.45);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+  }
+
+  .capture-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+  }
+  .btn-capture {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    padding: 0;
+    position: relative;
+    cursor: pointer;
+    touch-action: none;
+  }
+  .capture-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 4px solid rgb(255 255 255 / 0.25);
+    border-top: 4px solid rgb(255 255 255 / 0.85);
+    transition: transform 0.1s ease-out;
+  }
+  .capture-button {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.1s ease;
+  }
+  .btn-capture:active .capture-button {
+    transform: scale(0.9);
+  }
+
+  .btn-gallery-thumb {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    border-radius: var(--radius-md);
+    background: var(--color-ink-700);
+    border: 2px solid #fff;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .screen-camera.active .btn-gallery-thumb {
+    view-transition-name: gallery-card;
+  }
+  .thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--color-ink-500);
+  }
+
+  /* Icon buttons — opaque enough for contrast over any frame */
+  .btn-icon {
+    width: var(--touch-target);
+    height: var(--touch-target);
+    border-radius: 9999px;
+    background: rgb(0 0 0 / 0.55);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.6);
+    transition: background 0.2s ease;
+  }
+  .btn-icon:active {
+    background: rgb(0 0 0 / 0.72);
+  }
+
+  /* Demo-mode badge */
+  .demo-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 20;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    background: var(--color-jovi-yellow);
+    color: var(--color-ink-900);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Gallery ---------------------------------------------------------------- */
+  .screen-gallery {
+    background: var(--color-surface);
+  }
+  .screen-gallery.active {
+    view-transition-name: gallery-card;
+  }
+  .gallery-header,
+  .share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-ink-300);
+  }
+  .gallery-header h2,
+  .share-header h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+  .btn-text {
+    background: none;
+    border: none;
+    color: var(--color-jovi-blue);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: var(--touch-target);
+  }
+  .gallery-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 120px;
+    grid-auto-flow: dense;
+    gap: 0.75rem;
+  }
+  .gallery-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--color-ink-500);
+  }
+  .gallery-empty .icon-empty {
+    font-size: 48px;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  .gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    border: 1px solid var(--color-ink-300);
+  }
+  .gallery-item.featured {
+    grid-column: span 2;
+    grid-row: span 2;
+    border-radius: var(--radius-lg);
+    border-color: var(--color-jovi-blue);
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gallery-item .sharpness-badge {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    background: var(--color-jovi-blue);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+  }
+  .gallery-item.stat-card {
+    background: linear-gradient(135deg, var(--color-jovi-blue) 0%, var(--color-jovi-blue-dark) 100%);
+    color: #fff;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: none;
+  }
+  .gallery-item.stat-card .stat-title {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .gallery-item.stat-card .stat-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+  .gallery-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--color-ink-300);
+  }
+
+  /* Detail ----------------------------------------------------------------- */
+  .screen-detail {
+    background: var(--color-ink-900);
+  }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: rgb(0 0 0 / 0.5);
+    color: #fff;
+  }
+  .detail-date {
+    font-size: 0.875rem;
+  }
+  .detail-view {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .detail-view img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .detail-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--color-ink-900);
+  }
+  .btn-delete {
+    color: var(--color-error);
+  }
+
+  /* Share ---------------------------------------------------------------- */
+  .screen-share {
+    background: var(--color-surface);
+  }
+  .share-preview {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: var(--color-ink-100);
+  }
+  .share-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+  .share-options {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+  .btn-share-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-body);
+  }
+  .btn-share-option span:first-child {
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    background: var(--color-ink-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: background 0.2s ease;
+  }
+  .btn-share-option:active span:first-child {
+    background: var(--color-ink-300);
+  }
+  .btn-share-option span:last-child {
+    font-size: 0.75rem;
+    color: var(--color-ink-500);
+  }
+  .share-status {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-success);
+    min-height: 48px;
+  }
+
+  /* Buttons ------------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    min-height: var(--touch-target);
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--color-jovi-blue);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-jovi-blue-dark);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+  .btn-primary:disabled {
+    background: var(--color-ink-300);
+    cursor: not-allowed;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--color-jovi-blue);
+    border: 2px solid var(--color-jovi-blue);
+  }
+  .btn-share {
+    width: 100%;
+  }
+
+  /* Toast ------------------------------------------------------------------ */
+  .toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+  }
+  .toast {
+    background: var(--color-ink-900);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    animation: toast-in 0.3s ease;
+  }
+
+  /* Skeleton ------------------------------------------------------------- */
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-ink-300) 25%, var(--color-ink-100) 50%, var(--color-ink-300) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+  }
+
+  /* Utility ----------------------------------------------------------------- */
+  .d-none {
+    display: none !important;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Performance Spark ---------------------------------------------------- */
+  .performance-spark {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    box-shadow: 0 0 10px var(--color-success);
+    animation: spark-pulse 1.5s ease-in-out infinite;
+    display: inline-block;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .performance-spark.ready {
+    background-color: var(--color-success);
+    box-shadow: 0 0 10px var(--color-success);
+  }
+  .performance-spark.low-light {
+    background-color: var(--color-jovi-yellow);
+    box-shadow: 0 0 10px var(--color-jovi-yellow);
+  }
+  .performance-spark.stabilizing {
+    background-color: var(--color-jovi-blue-light);
+    box-shadow: 0 0 10px var(--color-jovi-blue-light);
+  }
+
+  /* View Transitions (JOVI-103.4) -------------------------------------- */
+  html.view-transitioning .screen {
+    transition: none !important;
+  }
+  .screen-detail.active #detail-image {
+    view-transition-name: detail-photo;
+  }
+  .screen-gallery.active .gallery-item img.transition-active {
+    view-transition-name: detail-photo;
+  }
+}
+
+/* ---- Keyframes (outside layers so they always resolve) ----------------- */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes aura-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2);
+    opacity: 0.5;
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+@keyframes spark-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+/* ---- Liquid Glass hardening: honour user preferences ------------------- */
+@media (prefers-reduced-transparency: reduce) {
+  .top-bar {
+    background: rgb(18 18 22 / 0.94);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .aura-light-effect.active,
+  .performance-spark,
+  .skeleton,
+  .toast {
+    animation: none !important;
+  }
+  .screen {
+    transition: none !important;
+  }
+}

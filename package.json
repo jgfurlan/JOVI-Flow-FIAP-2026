@@ -1,5 +1,14 @@
 {
-  "dependencies": {
+  "name": "jovi-flow-fiap-2026",
+  "private": true,
+  "description": "JOVI Flow — 3-touch mobile camera web app (FIAP Challenge 2026, Sprint 2)",
+  "scripts": {
+    "css": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --minify",
+    "css:watch": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --watch"
+  },
+  "devDependencies": {
+    "@fontsource/poppins": "^5.3.0",
+    "@tailwindcss/cli": "4.3.3",
     "puppeteer": "^25.1.0"
   }
 }

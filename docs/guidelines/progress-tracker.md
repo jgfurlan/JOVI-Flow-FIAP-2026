@@ -6,10 +6,12 @@ Deliverable = one ZIP uploaded to the FIAP platform (`src/poc/`) + a `.pdf` pres
 Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind), 5 pts presentation.
 
 ## Active Implementation
-- **Current Task:** Sprint 2 hardening of `src/poc/` for the ZIP deliverable.
-- **Status:** Specs drafted, awaiting approval:
-  - `docs/specs/JOVI-108-local-asset-vendoring/` — remove all CDN deps (Bootstrap, Poppins); render offline.
-  - `docs/specs/JOVI-109-camera-demo-mode/` — synthetic viewfinder so every screen works with no camera / on `file://`.
+- **Current Task:** `JOVI-109` — camera demo mode (spec written, not started).
+- **Status:**
+  - `JOVI-108` **implemented** on branch `JOVI-108-tailwind-liquidglass-foundation`, verification passing
+    (headless smoke: 0 failed / 0 external requests, Poppins applied, Tailwind utilities + `@theme` live,
+    CSS 22 KB / ~5.4 KB gz). Spec: `docs/specs/JOVI-108-tailwind-liquidglass-foundation/`.
+  - `JOVI-109` next — synthetic viewfinder so every screen works with no camera / on `file://`.
 
 ## Completed Features
 - ✅ JOVI-101 Negócio (validated dores and benchmarks).
@@ -27,12 +29,14 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - **2026-08-30:** Reviewed `docs/jovi-flow-sprint2.pdf`. Confirmed constraints: ZIP-only delivery, external links not graded, network not guaranteed → CDN deps became a **correctness defect**. Opened JOVI-108 / JOVI-109.
 - **2026-08-30:** Adopted the `agent-project-template` workflow (scoped): two-file spec system (`docs/specs/<id>-<slug>/{product,tech}.md` + `TEMPLATE/`), refreshed `ai-workflow-rules.md`, added TDD section to `code-standards.md`. Real JOVI guideline content (architecture, overview, ui-context) kept as-is.
 - **2026-08-30:** Bootstrap slated for removal — usage is ~7 utility classes, JS bundle unused, `jovi.css` owns the design system (JOVI-108).
+- **2026-08-31:** Market + tech research (Tailwind vs Bootstrap 2026, Liquid Glass, camera APIs, perf budgets). **Decided:** CSS framework = **Tailwind v4 hybrid** (utilities + `@theme` + `@layer components`); UI = **Liquid Glass** (brand-authentic — vivo OriginOS 6 "Origin Design"); Tailwind delivery = `npm` devDependency (standalone binary is 107 MB, over GitHub's file limit). Research + decision archived in the approved plan.
+- **2026-08-31:** `JOVI-108` implemented — Bootstrap + all CDNs removed; Tailwind v4 wired (`input.css` → generated `jovi.css`, 22 KB / ~5.4 KB gz); Poppins self-hosted (SIL OFL); Liquid Glass base hardened for blur cost / contrast / `prefers-reduced-transparency` + `prefers-reduced-motion`; `ci.yml` updated (`npm ci`, stylelint→`input.css`, CSS-in-sync check).
 - **2026-08-30:** Swapped project tracker Linear → **ClickUp** (Custom Task IDs, `JOVI-` prefix). Updated `CLAUDE.md` + all guidelines.
 - **2026-08-30:** Workflow trimmed for **solo maintainer + pre-deadline**: folded `andrej-karpathy-skills:karpathy-guidelines` (think-before-coding / simplicity / surgical / goal-driven) into `code-standards.md`; added a **lightweight single-file `spec.md` lane** for < ~50 LOC changes; **Graphify shelved** until after 2026-09-21 (grep/glob primary); ClickUp `in review` / PR / milestone-comment steps made **optional** (plan mode = review gate); UX docs **consolidated 4 → 1** (`ui-context.md`; deleted `JOVI_Camera_SmartCanvas_Design.md` + `JOVI_Camera_UX_DeepDive.md`).
 
 ## Feature Queue (ClickUp Tasks)
-1. `JOVI-108` Local asset vendoring — zero external requests. **Blocker.** Do first.
-2. `JOVI-109` Camera demo mode — cameraless fallback for `file://` / no-camera grading. Depends on 108.
+1. ~~`JOVI-108` Tailwind v4 hybrid + Liquid Glass foundation + zero external requests.~~ **DONE 2026-08-31** (branch `JOVI-108-tailwind-liquidglass-foundation`).
+2. `JOVI-109` Camera demo mode — cameraless fallback for `file://` / no-camera grading. **Next.**
 3. `JOVI-110` (proposed) Delete `src/prototype/`; ZIP layout with `index.html` at root.
 4. `JOVI-111` (proposed) Robustness pass: stuck capture button (`finally`), `switchCamera` facing bug, delete-by-id not by base64, gallery incremental render.
 5. `JOVI-112` (proposed) Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).

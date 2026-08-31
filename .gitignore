@@ -7,3 +7,8 @@ AGENTS.md
 .pi/
 graphify-out/
 node_modules/
+
+# Tailwind standalone binary — 107 MB, exceeds GitHub's file limit.
+# Rebuild CSS via `npm run css` (uses @tailwindcss/cli devDependency).
+tools/tailwindcss
+tools/tailwindcss-*

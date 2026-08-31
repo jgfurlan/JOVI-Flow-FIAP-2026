@@ -25,14 +25,25 @@ jobs:
         run: |
           npm install -g htmlhint stylelint eslint@8
 
+      - name: Install project deps
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
       - name: HTMLHint
         run: htmlhint src/poc/index.html src/prototype/index.html
 
-      - name: Stylelint (jovi.css)
-        run: npx stylelint "src/**/css/jovi.css" --allow-empty-input
+      - name: Stylelint (Tailwind source)
+        run: npx stylelint "src/poc/css/input.css" --allow-empty-input
 
       - name: ESLint (app.js)
         run: npx eslint "src/**/js/app.js" --no-error-on-unmatched-pattern
+
+      - name: CSS build is in sync
+        run: |
+          npm run css
+          git diff --exit-code -- src/poc/css/jovi.css \
+            || (echo "::error::src/poc/css/jovi.css is stale — run 'npm run css' and commit" && exit 1)
 
   # ── Security Scan ──────────────────────────────────────
   sast:
