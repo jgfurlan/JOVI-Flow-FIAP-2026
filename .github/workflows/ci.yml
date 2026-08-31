@@ -63,6 +63,11 @@ jobs:
     needs: [lint, sast]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    # One Pages deploy at a time. Queue extra pushes instead of racing them;
+    # don't cancel an in-flight publish.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       contents: read
       pages: write
