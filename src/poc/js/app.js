@@ -10,11 +10,18 @@ const JOVIFlow = (() => {
     let fpsHistory = [];
     let animationFrameId = null;
 
+    // Camera Mode & Demo State
+    const CAMERA_MODE = { LIVE: 'live', DEMO: 'demo' };
+    let cameraMode = CAMERA_MODE.LIVE;
+    let demoRafId = null;
+    let intendedFacing = 'environment';
+
     // Aura Light Gesture State
     let isDragging = false;
     let startX = 0;
     let startTemperature = 5000; // default Kelvin
     let currentTemperature = 5000;
+    let lastCaptureTime = 0;
 
     const SCREENS = {
         SPLASH: 'splash',
@@ -36,15 +43,9 @@ const JOVIFlow = (() => {
 
             showScreen(SCREENS.SPLASH);
 
-            if (window.location.protocol === 'file:') {
-                showToast('Aviso: Câmera requer Servidor HTTP (localhost)');
-            }
-
             setTimeout(() => {
-                if (window.location.protocol !== 'file:') {
-                    showScreen(SCREENS.CAMERA);
-                    startCamera();
-                }
+                showScreen(SCREENS.CAMERA);
+                jovi_camera_acquire();
             }, 2000);
         } catch (error) {
             alert("Init error: " + error.message);
@@ -53,9 +54,9 @@ const JOVIFlow = (() => {
     }
 
     function bindEvents() {
-        document.getElementById('screen-splash').addEventListener('click', () => {
+        document.getElementById('screen-splash')?.addEventListener('click', () => {
             showScreen(SCREENS.CAMERA);
-            startCamera();
+            jovi_camera_acquire();
         });
 
         // Pointer gestures for Aura Shutter button
@@ -92,12 +93,26 @@ const JOVIFlow = (() => {
             btnCapture.addEventListener('pointerup', (e) => {
                 if (!isDragging) return;
                 isDragging = false;
-                btnCapture.releasePointerCapture(e.pointerId);
+                try {
+                    btnCapture.releasePointerCapture(e.pointerId);
+                } catch (_) {}
                 startTemperature = currentTemperature;
 
                 const diffX = Math.abs(e.clientX - startX);
                 if (diffX < 8) {
-                    capturePhoto(); // quick tap triggers snap
+                    const now = Date.now();
+                    if (now - lastCaptureTime > 400) {
+                        lastCaptureTime = now;
+                        capturePhoto();
+                    }
+                }
+            });
+
+            btnCapture.addEventListener('click', () => {
+                const now = Date.now();
+                if (now - lastCaptureTime > 400) {
+                    lastCaptureTime = now;
+                    capturePhoto();
                 }
             });
 
@@ -109,11 +124,11 @@ const JOVIFlow = (() => {
         document.getElementById('btn-gallery-thumb')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
         document.getElementById('btn-goto-camera')?.addEventListener('click', () => {
             showScreen(SCREENS.CAMERA);
-            startCamera();
+            jovi_camera_resume();
         });
         document.getElementById('btn-back-camera')?.addEventListener('click', () => {
             showScreen(SCREENS.CAMERA);
-            startCamera();
+            jovi_camera_resume();
         });
         document.getElementById('btn-back-gallery')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
         document.getElementById('btn-back-detail')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
@@ -123,6 +138,19 @@ const JOVIFlow = (() => {
 
         document.querySelectorAll('.btn-share-option').forEach(btn => {
             btn.addEventListener('click', () => shareTo(btn.dataset.platform));
+        });
+
+        document.getElementById('btn-settings')?.addEventListener('click', () => {
+            if (cameraMode === CAMERA_MODE.LIVE) {
+                stopCamera();
+                jovi_camera_enterDemo('ativado manualmente');
+            } else {
+                jovi_camera_acquire();
+            }
+        });
+
+        document.getElementById('btn-retry-camera')?.addEventListener('click', () => {
+            jovi_camera_acquire();
         });
 
         document.getElementById('btn-switch-camera')?.addEventListener('click', switchCamera);
@@ -156,14 +184,24 @@ const JOVIFlow = (() => {
         }
     }
 
-    async function startCamera() {
+    async function jovi_camera_acquire() {
         const video = document.getElementById('camera-preview');
         if (!video) return;
+
+        if (window.location.protocol === 'file:') {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                jovi_camera_enterDemo('abra via servidor http para câmera real');
+                return;
+            }
+        } else if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            jovi_camera_enterDemo('sem suporte a câmera');
+            return;
+        }
 
         try {
             const constraints = {
                 video: {
-                    facingMode: 'environment',
+                    facingMode: intendedFacing,
                     width: { ideal: 1920 },
                     height: { ideal: 1080 }
                 },
@@ -171,15 +209,212 @@ const JOVIFlow = (() => {
             };
 
             mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraMode = CAMERA_MODE.LIVE;
+            jovi_camera_stopDemoFeed();
+
+            video.classList.remove('d-none');
+            document.getElementById('demo-feed')?.classList.add('d-none');
+            document.getElementById('demo-badge')?.classList.add('d-none');
+            document.getElementById('btn-retry-camera')?.classList.add('d-none');
+
             video.srcObject = mediaStream;
             await video.play();
             startFPSCounter();
-            console.log('[JOVI Flow] Camera started');
+            console.log('[JOVI Flow] Camera started in LIVE mode');
         } catch (error) {
-            console.error('[JOVI Flow] Camera error:', error);
-            showToast('Câmera não disponível. Use um dispositivo compatível.');
+            console.warn('[JOVI Flow] Camera acquisition failed:', error.name, error.message);
+            stopCamera();
+
+            if (window.location.protocol === 'file:') {
+                jovi_camera_enterDemo('abra via servidor http para câmera real');
+            } else if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+                jovi_camera_enterDemo('permissão de câmera negada');
+            } else if (error.name === 'NotFoundError' || error.name === 'OverconstrainedError') {
+                jovi_camera_enterDemo('nenhuma câmera encontrada');
+            } else if (error.name === 'NotReadableError' || error.name === 'AbortError') {
+                jovi_camera_enterDemo('câmera em uso por outro app');
+            } else {
+                jovi_camera_enterDemo('câmera indisponível');
+            }
         }
     }
+
+    function jovi_camera_enterDemo(reason) {
+        cameraMode = CAMERA_MODE.DEMO;
+        stopCamera();
+
+        const video = document.getElementById('camera-preview');
+        const demoFeed = document.getElementById('demo-feed');
+        const demoBadge = document.getElementById('demo-badge');
+        const retryBtn = document.getElementById('btn-retry-camera');
+        const fpsCounter = document.getElementById('fps-counter');
+
+        if (video) video.classList.add('d-none');
+        if (demoFeed) demoFeed.classList.remove('d-none');
+        if (demoBadge) demoBadge.classList.remove('d-none');
+
+        if (reason === 'permissão de câmera negada') {
+            retryBtn?.classList.remove('d-none');
+        } else {
+            retryBtn?.classList.add('d-none');
+        }
+
+        if (fpsCounter) {
+            fpsCounter.textContent = '60 FPS (DEMO)';
+        }
+
+        jovi_camera_startDemoFeed();
+        showToast(`Modo Demo: ${reason}`);
+        console.log(`[JOVI Flow] Entered DEMO mode (${reason})`);
+    }
+
+    function jovi_camera_startDemoFeed() {
+        jovi_camera_stopDemoFeed();
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            jovi_camera_renderDemoFrame(0);
+            demoRafId = null;
+            return;
+        }
+
+        function loop(timestamp) {
+            if (cameraMode !== CAMERA_MODE.DEMO || document.hidden || currentScreen !== SCREENS.CAMERA) {
+                demoRafId = null;
+                return;
+            }
+            jovi_camera_renderDemoFrame(timestamp);
+            demoRafId = requestAnimationFrame(loop);
+        }
+
+        demoRafId = requestAnimationFrame(loop);
+    }
+
+    function jovi_camera_stopDemoFeed() {
+        if (demoRafId) {
+            cancelAnimationFrame(demoRafId);
+            demoRafId = null;
+        }
+    }
+
+    function jovi_camera_renderDemoFrame(t) {
+        const canvas = document.getElementById('demo-feed');
+        if (!canvas) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width || 360;
+        const height = rect.height || 640;
+
+        if (canvas.width !== Math.round(width) || canvas.height !== Math.round(height)) {
+            canvas.width = Math.round(width);
+            canvas.height = Math.round(height);
+        }
+
+        const ctx = canvas.getContext('2d');
+        const time = t || performance.now();
+        const w = canvas.width;
+        const h = canvas.height;
+
+        // 1. Animated diagonal gradient in brand tokens
+        const angle = (time * 0.0003) % (Math.PI * 2);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const grad = ctx.createLinearGradient(
+            w / 2 - cos * w * 0.5,
+            h / 2 - sin * h * 0.5,
+            w / 2 + cos * w * 0.5,
+            h / 2 + sin * h * 0.5
+        );
+        grad.addColorStop(0, '#0a3dff');
+        grad.addColorStop(0.5, '#121629');
+        grad.addColorStop(1, '#ccab00');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 2. Soft drifting radial Aura highlight
+        const auraX = w / 2 + Math.sin(time * 0.001) * (w * 0.2);
+        const auraY = h * 0.45 + Math.cos(time * 0.0015) * (h * 0.12);
+        let r, g, b;
+        if (currentTemperature < 5000) {
+            const ratio = (currentTemperature - 2000) / 3000;
+            r = 255;
+            g = Math.round(140 + ratio * 115);
+            b = Math.round(ratio * 255);
+        } else {
+            const ratio = (currentTemperature - 5000) / 5000;
+            r = Math.round(255 - ratio * 245);
+            g = Math.round(255 - ratio * 194);
+            b = 255;
+        }
+        const auraRadius = Math.min(w, h) * 0.45;
+        const auraGrad = ctx.createRadialGradient(auraX, auraY, 0, auraX, auraY, auraRadius);
+        auraGrad.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.45)`);
+        auraGrad.addColorStop(0.6, `rgba(${r}, ${g}, ${b}, 0.12)`);
+        auraGrad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        ctx.fillStyle = auraGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 3. Subtle moving scanline
+        const scanlineY = (time * 0.12) % h;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.fillRect(0, scanlineY, w, 2);
+
+        // 4. Center reticle & brackets
+        const cx = w / 2;
+        const cy = h / 2;
+        ctx.strokeStyle = 'rgba(255, 214, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx - 32, cy - 32, 64, 64);
+
+        const bLen = 10;
+        ctx.beginPath();
+        ctx.moveTo(cx - 42, cy - 42 + bLen); ctx.lineTo(cx - 42, cy - 42); ctx.lineTo(cx - 42 + bLen, cy - 42);
+        ctx.moveTo(cx + 42 - bLen, cy - 42); ctx.lineTo(cx + 42, cy - 42); ctx.lineTo(cx + 42, cy - 42 + bLen);
+        ctx.moveTo(cx - 42, cy + 42 - bLen); ctx.lineTo(cx - 42, cy + 42); ctx.lineTo(cx - 42 + bLen, cy + 42);
+        ctx.moveTo(cx + 42 - bLen, cy + 42); ctx.lineTo(cx + 42, cy + 42); ctx.lineTo(cx + 42, cy + 42 - bLen);
+        ctx.stroke();
+
+        // 5. HUD text
+        ctx.font = '11px monospace';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0] + '.' + String(Math.floor(now.getMilliseconds() / 100));
+        ctx.fillText(`SIMULAÇÃO • ${timeStr}`, 16, h - 90);
+        ctx.fillText(`TEMP: ${Math.round(currentTemperature)}K`, 16, h - 74);
+    }
+
+    function jovi_camera_injectDemoDetail(ctx, w, h) {
+        const cx = w / 2;
+        const cy = h / 2;
+        ctx.save();
+        // Vary the focus sharpness level between captures (level 1 to 4)
+        // so calculateSharpness yields distinct scores (e.g. 0.65 to 0.95)
+        const level = Math.floor(Math.random() * 4) + 1;
+        const boxSize = 20 + level * 12;
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + level * 0.15})`;
+        ctx.fillRect(cx - boxSize / 2, cy - boxSize / 2, boxSize, boxSize);
+        ctx.strokeStyle = `rgba(255, 214, 0, ${0.4 + level * 0.15})`;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cx - boxSize / 2, cy - boxSize / 2, boxSize, boxSize);
+        ctx.restore();
+    }
+
+    function jovi_camera_activeSurface() {
+        if (cameraMode === CAMERA_MODE.DEMO) {
+            return document.getElementById('demo-feed');
+        }
+        return document.getElementById('camera-preview');
+    }
+
+    function jovi_camera_resume() {
+        if (cameraMode === CAMERA_MODE.DEMO) {
+            jovi_camera_startDemoFeed();
+        } else {
+            jovi_camera_acquire();
+        }
+    }
+
+    const startCamera = jovi_camera_acquire;
 
     function stopCamera() {
         if (mediaStream) {
@@ -259,37 +494,47 @@ const JOVIFlow = (() => {
     }
 
     async function capturePhoto() {
-        const video = document.getElementById('camera-preview');
+        const surface = jovi_camera_activeSurface();
         const canvas = document.getElementById('camera-canvas');
         const auraEffect = document.querySelector('.aura-light-effect');
 
-        if (!video || !canvas) return;
+        if (!surface || !canvas) return;
 
         const captureBtn = document.getElementById('btn-capture');
-        captureBtn.disabled = true;
+        if (captureBtn) captureBtn.disabled = true;
 
         auraEffect?.classList.add('active');
 
-        canvas.width = video.videoWidth || 640;
-        canvas.height = video.videoHeight || 480;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0);
+        try {
+            if (cameraMode === CAMERA_MODE.DEMO && surface.getContext) {
+                jovi_camera_injectDemoDetail(surface.getContext('2d'), surface.width, surface.height);
+            }
 
-        applyAuraLightEffect(ctx, canvas.width, canvas.height);
+            canvas.width = surface.videoWidth || surface.width || 640;
+            canvas.height = surface.videoHeight || surface.height || 480;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(surface, 0, 0, canvas.width, canvas.height);
 
-        const sharpness = calculateSharpness(ctx, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg', 0.85);
-        lastPhotoData = imageData;
+            applyAuraLightEffect(ctx, canvas.width, canvas.height);
 
-        const photo = await savePhoto(imageData, sharpness);
+            const sharpness = calculateSharpness(ctx, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.85);
+            lastPhotoData = imageData;
 
-        setTimeout(() => {
-            auraEffect?.classList.remove('active');
-            captureBtn.disabled = false;
+            await savePhoto(imageData, sharpness);
+
             showToast('Foto salva!');
             updateGalleryThumbnail(imageData);
             loadGallery();
-        }, 300);
+        } catch (error) {
+            console.error('[JOVI Flow] Capture error:', error);
+            showToast('Erro ao capturar foto');
+        } finally {
+            setTimeout(() => {
+                auraEffect?.classList.remove('active');
+                if (captureBtn) captureBtn.disabled = false;
+            }, 300);
+        }
     }
 
     function applyAuraLightEffect(ctx, width, height) {
@@ -421,15 +666,16 @@ const JOVIFlow = (() => {
                 const photos = request.result.reverse();
 
                 if (photos.length === 0) {
-                    empty.style.display = 'flex';
-                    footer.style.display = 'none';
+                    if (empty) empty.style.display = 'flex';
+                    if (footer) footer.style.display = 'none';
+                    grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
                     return;
                 }
 
-                empty.style.display = 'none';
-                footer.style.display = 'block';
+                if (empty) empty.style.display = 'none';
+                if (footer) footer.style.display = 'block';
 
-                grid.innerHTML = '';
+                grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
 
                 // Find highest sharpness index
                 let highestSharpness = 0;
@@ -575,32 +821,40 @@ const JOVIFlow = (() => {
     }
 
     async function switchCamera() {
+        if (cameraMode === CAMERA_MODE.DEMO) {
+            showToast('Troca de câmera indisponível no modo demo');
+            return;
+        }
+
         if (!mediaStream) return;
 
-        const video = document.getElementById('camera-preview');
-        const currentFacing = mediaStream.getVideoTracks()[0].getSettings().facingMode;
-        const newFacing = currentFacing === 'environment' ? 'user' : 'environment';
-
+        intendedFacing = intendedFacing === 'environment' ? 'user' : 'environment';
         stopCamera();
 
         try {
             mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: newFacing }
+                video: { facingMode: intendedFacing }
             });
+            const video = document.getElementById('camera-preview');
             video.srcObject = mediaStream;
             await video.play();
-            showToast(`Câmera: ${newFacing === 'user' ? 'frontal' : 'traseira'}`);
+            showToast(`Câmera: ${intendedFacing === 'user' ? 'frontal' : 'traseira'}`);
         } catch (error) {
             console.error('[JOVI Flow] Switch camera error:', error);
             showToast('Erro ao trocar câmera');
-            startCamera();
+            jovi_camera_acquire();
         }
     }
 
     function toggleFlash() {
+        if (cameraMode === CAMERA_MODE.DEMO) {
+            showToast('Flash indisponível no modo demo');
+            return;
+        }
+
         if (!mediaStream) return;
         const track = mediaStream.getVideoTracks()[0];
-        if (track.getCapabilities()?.torch) {
+        if (track?.getCapabilities?.()?.torch) {
             const current = track.getSettings().torch;
             track.applyConstraints({ advanced: [{ torch: !current }] });
             showToast(!current ? 'Flash ligado' : 'Flash desligado');
@@ -611,9 +865,13 @@ const JOVIFlow = (() => {
 
     function handleVisibilityChange() {
         if (document.hidden) {
-            stopCamera();
+            if (cameraMode === CAMERA_MODE.LIVE) {
+                stopCamera();
+            } else {
+                jovi_camera_stopDemoFeed();
+            }
         } else if (currentScreen === SCREENS.CAMERA) {
-            startCamera();
+            jovi_camera_resume();
         }
     }
 
