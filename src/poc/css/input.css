@@ -673,6 +673,74 @@
     background-size: 200% 100%;
     animation: skeleton-loading 1.5s infinite;
   }
+  .skeleton-item {
+    aspect-ratio: 1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  /* Smart Suggestions & Performance Feedback ----------------------------- */
+  .suggestion-container {
+    position: absolute;
+    top: max(4.5rem, calc(env(safe-area-inset-top) + 3.75rem));
+    left: 0;
+    right: 0;
+    z-index: 15;
+    pointer-events: auto;
+  }
+  .camera-suggestion-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #ffffff;
+    background: linear-gradient(var(--glass-scrim), var(--glass-scrim)), var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: 9999px;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .camera-suggestion-pill:active {
+    transform: scale(0.96);
+  }
+  .perf-latency-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.45rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-jovi-yellow);
+    background: rgb(0 0 0 / 0.5);
+    border: 1px solid rgb(255 214 0 / 0.4);
+    border-radius: 9999px;
+    animation: toast-in 0.2s ease;
+  }
+  .gallery-suggestion-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0.5rem 1rem 0;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    color: #ffffff;
+    background: linear-gradient(var(--glass-scrim), var(--glass-scrim)), var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.15), var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+  }
+  .gallery-suggestion-banner:active {
+    transform: scale(0.98);
+  }
 
   /* Utility ----------------------------------------------------------------- */
   .d-none,
@@ -776,7 +844,9 @@
 
 /* ---- Liquid Glass hardening: honour user preferences ------------------- */
 @media (prefers-reduced-transparency: reduce) {
-  .top-bar {
+  .top-bar,
+  .camera-suggestion-pill,
+  .gallery-suggestion-banner {
     background: rgb(18 18 22 / 0.94);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -786,9 +856,13 @@
   .spinner,
   .aura-light-effect.active,
   .performance-spark,
+  .perf-latency-badge,
+  .camera-suggestion-pill,
+  .gallery-suggestion-banner,
   .skeleton,
   .toast {
     animation: none !important;
+    transition: none !important;
   }
   .screen {
     transition: none !important;

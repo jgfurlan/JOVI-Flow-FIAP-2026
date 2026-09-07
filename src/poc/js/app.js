@@ -38,6 +38,7 @@ const JOVIFlow = (() => {
         try {
             console.log('[JOVI Flow] Initializing...');
             bindEvents();
+            updateCameraSuggestion(currentTemperature);
 
             // Do not await loadGallery so it doesn't block the UI if DB hangs
             loadGallery().catch(e => console.error('[JOVI Flow] loadGallery error:', e));
@@ -154,6 +155,7 @@ const JOVIFlow = (() => {
             jovi_camera_acquire();
         });
 
+        document.getElementById('camera-suggestion')?.addEventListener('click', applyNextSmartSuggestion);
         document.getElementById('btn-switch-camera')?.addEventListener('click', switchCamera);
         document.getElementById('btn-flash')?.addEventListener('click', toggleFlash);
 
@@ -492,6 +494,36 @@ const JOVIFlow = (() => {
 
         overlay.style.background = `radial-gradient(circle, rgba(${r}, ${g}, ${b}, 0.25) 0%, rgba(${r}, ${g}, ${b}, 0) 80%)`;
         overlay.style.mixBlendMode = 'soft-light';
+        updateCameraSuggestion(temp);
+    }
+
+    function updateCameraSuggestion(temperature) {
+        const icon = document.getElementById('camera-suggestion-icon');
+        const text = document.getElementById('camera-suggestion-text');
+        if (!icon || !text) return;
+
+        if (temperature < 3500) {
+            icon.textContent = '💡';
+            text.textContent = 'Sugestão: Luz Quente (Retratos intimistas)';
+        } else if (temperature <= 5500) {
+            icon.textContent = '☀️';
+            text.textContent = 'Sugestão: Luz Natural (Nitidez equilibrada)';
+        } else {
+            icon.textContent = '⚡';
+            text.textContent = 'Sugestão: Luz Fria (Texturas e contrastes)';
+        }
+    }
+
+    function applyNextSmartSuggestion() {
+        if (currentTemperature < 3500) {
+            currentTemperature = 5000;
+        } else if (currentTemperature <= 5500) {
+            currentTemperature = 6500;
+        } else {
+            currentTemperature = 2800;
+        }
+        updateAuraLightTemperature(currentTemperature);
+        showToast(`Preset aplicado: ${Math.round(currentTemperature)}K`);
     }
 
     async function capturePhoto() {
@@ -506,6 +538,7 @@ const JOVIFlow = (() => {
 
         auraEffect?.classList.add('active');
 
+        const tCaptureStart = performance.now();
         try {
             if (cameraMode === CAMERA_MODE.DEMO && surface.getContext) {
                 jovi_camera_injectDemoDetail(surface.getContext('2d'), surface.width, surface.height);
@@ -523,6 +556,14 @@ const JOVIFlow = (() => {
             lastPhotoData = imageData;
 
             await savePhoto(imageData, sharpness);
+
+            const latencyMs = Math.max(1, Math.round(performance.now() - tCaptureStart));
+            const latencyBadge = document.getElementById('perf-latency-badge');
+            if (latencyBadge) {
+                latencyBadge.textContent = `⚡ ${latencyMs}ms Zero-Lag`;
+                latencyBadge.classList.remove('d-none');
+                setTimeout(() => latencyBadge?.classList.add('d-none'), 2200);
+            }
 
             showToast('Foto salva!');
             updateGalleryThumbnail(imageData);
@@ -654,8 +695,19 @@ const JOVIFlow = (() => {
         const grid = document.getElementById('gallery-grid');
         const empty = document.getElementById('gallery-empty');
         const footer = document.getElementById('gallery-footer');
+        const gallerySuggestion = document.getElementById('gallery-suggestion');
+        const gallerySuggestionText = document.getElementById('gallery-suggestion-text');
 
         if (!grid) return;
+
+        // Visual performance feedback: Render skeletons if grid is empty
+        if (grid.querySelectorAll('.gallery-item').length === 0) {
+            for (let i = 0; i < 3; i++) {
+                const skel = document.createElement('div');
+                skel.className = 'gallery-item skeleton-item skeleton';
+                grid.appendChild(skel);
+            }
+        }
 
         try {
             const db = await openDB();
@@ -669,6 +721,7 @@ const JOVIFlow = (() => {
                 if (photos.length === 0) {
                     if (empty) empty.style.display = 'flex';
                     if (footer) footer.style.display = 'none';
+                    if (gallerySuggestion) gallerySuggestion.classList.add('d-none');
                     grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
                     return;
                 }
@@ -688,6 +741,17 @@ const JOVIFlow = (() => {
                         featuredIndex = idx;
                     }
                 });
+
+                // Smart Recommendation Banner
+                if (gallerySuggestion && gallerySuggestionText && featuredIndex !== -1) {
+                    const featuredPhoto = photos[featuredIndex];
+                    const pct = Math.round(highestSharpness * 100);
+                    gallerySuggestionText.textContent = `Sugestão: Foto destacada possui máxima nitidez (${pct}%). Toque para ver.`;
+                    gallerySuggestion.classList.remove('d-none');
+                    gallerySuggestion.onclick = () => openDetail(featuredPhoto);
+                } else if (gallerySuggestion) {
+                    gallerySuggestion.classList.add('d-none');
+                }
 
                 // Inject dynamic optimization stats card in Bento grid
                 const statCard = document.createElement('div');
