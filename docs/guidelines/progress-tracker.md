@@ -6,7 +6,7 @@ Deliverable = one ZIP uploaded to the FIAP platform (`src/poc/`) + a `.pdf` pres
 Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind), 5 pts presentation.
 
 ## Active Implementation
-- **Current Task:** `JOVI-111` / `JOVI-112` — Robustness (delete-by-id) & Rubric features (sugestões automáticas + feedback de performance).
+- **Current Task:** `JOVI-112` — Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
 - **Status:**
   - `JOVI-108` **implemented** on branch `JOVI-108-tailwind-liquidglass-foundation`, verification passing
     (headless smoke: 0 failed / 0 external requests, Poppins applied, Tailwind utilities + `@theme` live,
@@ -16,6 +16,8 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
     detail/share flows, prefers-reduced-motion respected). Spec: `docs/specs/JOVI-109-camera-demo-mode/`.
   - `JOVI-110` **implemented** on branch `JOVI-110-clean-prototype-zip-layout`, verification passing
     (legacy `src/prototype/` removed, CI updated, deterministic packaging script `npm run zip` packages client files with `index.html` at archive root). Spec: `docs/specs/JOVI-110-cleanup-prototype-and-zip-layout/`.
+  - `JOVI-111` **implemented** on branch `JOVI-111-indexeddb-delete-by-id`, verification passing
+    (direct O(1) delete by primary key ID in IndexedDB without loading base64 blobs into memory). Spec: `docs/specs/JOVI-111-indexeddb-delete-by-id/`.
 
 ## Completed Features
 - ✅ JOVI-101 Negócio (validated dores and benchmarks).
@@ -27,6 +29,7 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - ✅ JOVI-108 Tailwind v4 hybrid + Liquid Glass foundation + zero external requests.
 - ✅ JOVI-109 Camera demo mode (cameraless fallback with animated synthetic canvas, HUD, Aura reactivity, and robust error handling).
 - ✅ JOVI-110 Cleanup legacy `src/prototype/` & automated ZIP packaging (`npm run zip`).
+- ✅ JOVI-111 Robustness pass: delete-by-id in IndexedDB.
 
 ## Historical Decisions
 - **2026-04-16:** Standardized on Bootstrap 5.3.3 + Vanilla JS to eliminate bundle overhead.
@@ -43,12 +46,14 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - **2026-08-31:** **Retired the `develop` branch — trunk-based on `main` now.** `develop` had drifted ~20 commits behind `main` (never got the JOVI-106 View Transitions selector fix) and its stale `jovi.css` failed `stylelint no-duplicate-selectors` on every dependabot merge (3 red CI runs). The 3 real dependabot bumps (`actions/checkout` v7, `actions/setup-node` v7, `puppeteer` 25.8.0) were cherry-picked onto `main`; GitHub default branch → `main`; `dependabot.yml` pinned to `target-branch: main`; `ci.yml` push trigger reduced to `[main]`; `develop` deleted on GitHub + GitLab mirror.
 - **2026-09-07:** `JOVI-109` implemented — camera demo mode added for `file://` evaluations and cameraless devices. Dynamic canvas feed, sharpness variation, and auto-advance ensure 100% of the 5-screen flow can be evaluated offline.
 - **2026-09-07:** `JOVI-110` implemented — deleted legacy `src/prototype/`, updated `ci.yml`, and added `scripts/package-zip.mjs` (`npm run zip`) packaging client assets with `index.html` at root into a 49 KB deliverable.
+- **2026-09-07:** `JOVI-111` implemented — direct $O(1)$ delete by primary key ID in IndexedDB without loading Base64 blobs into memory.
 
 ## Feature Queue (ClickUp Tasks)
 1. ~~`JOVI-108` Tailwind v4 hybrid + Liquid Glass foundation + zero external requests.~~ **DONE 2026-08-31** (branch `JOVI-108-tailwind-liquidglass-foundation`).
 2. ~~`JOVI-109` Camera demo mode — cameraless fallback for `file://` / no-camera grading.~~ **DONE 2026-09-07** (branch `JOVI-109-camera-demo-mode`).
 3. ~~`JOVI-110` Delete `src/prototype/`; ZIP layout with `index.html` at root.~~ **DONE 2026-09-07** (branch `JOVI-110-clean-prototype-zip-layout`).
-4. `JOVI-111` (proposed) Robustness pass: delete-by-id not by base64.
+4. ~~`JOVI-111` Robustness pass: delete-by-id not by base64.~~ **DONE 2026-09-07** (branch `JOVI-111-indexeddb-delete-by-id`).
+5. `JOVI-112` (proposed) Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
 5. `JOVI-112` (proposed) Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
 6. `JOVI-113` (proposed) Sprint 2 presentation `.pdf` — team names + RMs, feature→need mapping, data model.
 7. `JOVI-114` (proposed) Mobile-first QA pass 360/390/428 px; `prefers-reduced-motion`; drop `user-scalable=no`; local Lighthouse vs the <200ms claim.

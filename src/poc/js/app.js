@@ -22,6 +22,7 @@ const JOVIFlow = (() => {
     let startTemperature = 5000; // default Kelvin
     let currentTemperature = 5000;
     let lastCaptureTime = 0;
+    let currentPhotoId = null;
 
     const SCREENS = {
         SPLASH: 'splash',
@@ -739,6 +740,7 @@ const JOVIFlow = (() => {
     }
 
     function openDetail(photo) {
+        currentPhotoId = photo.id;
         lastPhotoData = photo.data;
         document.getElementById('detail-image').src = photo.data;
         document.getElementById('detail-date').textContent = formatDate(photo.createdAt);
@@ -755,30 +757,36 @@ const JOVIFlow = (() => {
     }
 
     async function deleteCurrentPhoto() {
-        if (!lastPhotoData) return;
+        if (currentPhotoId == null && !lastPhotoData) return;
 
         try {
             const db = await openDB();
             const tx = db.transaction(STORAGE_KEY, 'readwrite');
             const store = tx.objectStore(STORAGE_KEY);
 
-            // Need to retrieve all to match the source Base64
-            const request = store.getAll();
-            request.onsuccess = async () => {
-                const photos = request.result;
-                const match = photos.find(p => p.data === lastPhotoData);
-                if (match) {
-                    store.delete(match.id);
-                    await new Promise(resolve => {
-                        tx.oncomplete = resolve;
-                    });
-                    showToast('Foto excluída');
-                    showScreen(SCREENS.GALLERY);
-                    loadGallery();
-                }
-            };
+            if (currentPhotoId != null) {
+                store.delete(currentPhotoId);
+            } else {
+                const request = store.getAll();
+                request.onsuccess = () => {
+                    const match = request.result.find(p => p.data === lastPhotoData);
+                    if (match) store.delete(match.id);
+                };
+            }
+
+            await new Promise((resolve, reject) => {
+                tx.oncomplete = resolve;
+                tx.onerror = () => reject(tx.error);
+            });
+
+            currentPhotoId = null;
+            lastPhotoData = null;
+            showToast('Foto excluída');
+            showScreen(SCREENS.GALLERY);
+            loadGallery();
         } catch (e) {
             console.error('[JOVI Flow] Delete failed:', e);
+            showToast('Erro ao excluir foto');
         }
     }
 
