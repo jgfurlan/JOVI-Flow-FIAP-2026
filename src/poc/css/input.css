@@ -12,7 +12,7 @@
      performance Spark, View Transitions, toasts, skeletons.
    ========================================================================= */
 
-/* Scan only the shipped app for utility classes — not docs/ or src/prototype/. */
+/* Scan only the shipped app for utility classes — not docs/ or external dirs. */
 @import "tailwindcss" source("..");
 
 /* ---- Design tokens -------------------------------------------------------- */

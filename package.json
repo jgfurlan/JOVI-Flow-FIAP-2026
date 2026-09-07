@@ -4,7 +4,9 @@
   "description": "JOVI Flow — 3-touch mobile camera web app (FIAP Challenge 2026, Sprint 2)",
   "scripts": {
     "css": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --minify",
-    "css:watch": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --watch"
+    "css:watch": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --watch",
+    "zip": "node scripts/package-zip.mjs",
+    "dist": "npm run zip"
   },
   "devDependencies": {
     "@fontsource/poppins": "^5.3.0",

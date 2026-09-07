@@ -12,3 +12,4 @@ node_modules/
 # Rebuild CSS via `npm run css` (uses @tailwindcss/cli devDependency).
 tools/tailwindcss
 tools/tailwindcss-*
+dist/
