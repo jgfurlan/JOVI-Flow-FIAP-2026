@@ -31,7 +31,7 @@ jobs:
           PUPPETEER_SKIP_DOWNLOAD: "true"
 
       - name: HTMLHint
-        run: htmlhint src/poc/index.html src/prototype/index.html
+        run: htmlhint src/poc/index.html
 
       - name: Stylelint (Tailwind source)
         run: npx stylelint "src/poc/css/input.css" --allow-empty-input
