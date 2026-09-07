@@ -7,7 +7,7 @@
     <title>JOVI Flow – 3 Toques</title>
     <link rel="preload" href="assets/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="assets/fonts/poppins-600.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="css/jovi.css?v=9" rel="stylesheet">
+    <link href="css/jovi.css?v=10" rel="stylesheet">
 </head>
 <body>
     <div id="app">
@@ -45,9 +45,16 @@
                     <div class="flex items-center gap-2">
                         <span class="fps-counter" id="fps-counter">-- FPS</span>
                         <div id="performance-spark" class="performance-spark ready" aria-label="Indicador IA Inteligente" title="IA Status"></div>
+                        <span id="perf-latency-badge" class="perf-latency-badge d-none" aria-live="polite">⚡ 18ms</span>
                     </div>
                     <button id="btn-settings" class="btn-icon" aria-label="Configurações e alternar modo demo">
                         <span class="icon-settings">⚙️</span>
+                    </button>
+                </div>
+                <div class="suggestion-container flex justify-center pointer-events-auto">
+                    <button id="camera-suggestion" class="camera-suggestion-pill" role="status" aria-live="polite" aria-label="Sugestão automática de uso. Toque para aplicar.">
+                        <span class="suggestion-icon" id="camera-suggestion-icon">💡</span>
+                        <span class="suggestion-text" id="camera-suggestion-text">Sugestão: Luz Natural equilibrada</span>
                     </button>
                 </div>
                 <div class="retry-camera-container flex justify-center pointer-events-auto">
@@ -79,6 +86,10 @@
                 <h2>Galeria Bento</h2>
                 <button id="btn-select" class="btn-text" aria-label="Selecionar fotos">Selecionar</button>
             </header>
+            <div id="gallery-suggestion" class="gallery-suggestion-banner d-none" role="status" aria-label="Recomendação inteligente de compartilhamento">
+                <span class="suggestion-icon">✨</span>
+                <span id="gallery-suggestion-text" class="suggestion-text">Sugestão: Foto destacada possui máxima nitidez. Toque para ver detalhes.</span>
+            </div>
             <div id="gallery-grid" class="gallery-grid">
                 <div class="gallery-empty" id="gallery-empty">
                     <span class="icon-empty">📷</span>

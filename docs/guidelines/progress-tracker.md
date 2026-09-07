@@ -6,7 +6,7 @@ Deliverable = one ZIP uploaded to the FIAP platform (`src/poc/`) + a `.pdf` pres
 Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind), 5 pts presentation.
 
 ## Active Implementation
-- **Current Task:** `JOVI-112` — Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
+- **Current Task:** `JOVI-113` / `JOVI-114` — Sprint 2 presentation PDF & Mobile-first QA / audit pass.
 - **Status:**
   - `JOVI-108` **implemented** on branch `JOVI-108-tailwind-liquidglass-foundation`, verification passing
     (headless smoke: 0 failed / 0 external requests, Poppins applied, Tailwind utilities + `@theme` live,
@@ -18,6 +18,8 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
     (legacy `src/prototype/` removed, CI updated, deterministic packaging script `npm run zip` packages client files with `index.html` at archive root). Spec: `docs/specs/JOVI-110-cleanup-prototype-and-zip-layout/`.
   - `JOVI-111` **implemented** on branch `JOVI-111-indexeddb-delete-by-id`, verification passing
     (direct O(1) delete by primary key ID in IndexedDB without loading base64 blobs into memory). Spec: `docs/specs/JOVI-111-indexeddb-delete-by-id/`.
+  - `JOVI-112` **implemented** on branch `JOVI-112-smart-suggestions-performance-feedback`, verification passing
+    (smart contextual camera suggestion pill reactive to Aura temp, instant latency feedback badge `⚡ XXms Zero-Lag`, gallery recommendation banner, and shimmer skeleton placeholders). Spec: `docs/specs/JOVI-112-rubric-smart-suggestions-performance-feedback/`.
 
 ## Completed Features
 - ✅ JOVI-101 Negócio (validated dores and benchmarks).
@@ -30,6 +32,7 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - ✅ JOVI-109 Camera demo mode (cameraless fallback with animated synthetic canvas, HUD, Aura reactivity, and robust error handling).
 - ✅ JOVI-110 Cleanup legacy `src/prototype/` & automated ZIP packaging (`npm run zip`).
 - ✅ JOVI-111 Robustness pass: delete-by-id in IndexedDB.
+- ✅ JOVI-112 Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (latency badge & skeletons).
 
 ## Historical Decisions
 - **2026-04-16:** Standardized on Bootstrap 5.3.3 + Vanilla JS to eliminate bundle overhead.
@@ -47,14 +50,14 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - **2026-09-07:** `JOVI-109` implemented — camera demo mode added for `file://` evaluations and cameraless devices. Dynamic canvas feed, sharpness variation, and auto-advance ensure 100% of the 5-screen flow can be evaluated offline.
 - **2026-09-07:** `JOVI-110` implemented — deleted legacy `src/prototype/`, updated `ci.yml`, and added `scripts/package-zip.mjs` (`npm run zip`) packaging client assets with `index.html` at root into a 49 KB deliverable.
 - **2026-09-07:** `JOVI-111` implemented — direct $O(1)$ delete by primary key ID in IndexedDB without loading Base64 blobs into memory.
+- **2026-09-07:** `JOVI-112` implemented — added contextual suggestion pill (reactive to Aura temperature), performance latency badge (<50ms feedback on capture), and gallery recommendation banner + shimmer skeletons.
 
 ## Feature Queue (ClickUp Tasks)
 1. ~~`JOVI-108` Tailwind v4 hybrid + Liquid Glass foundation + zero external requests.~~ **DONE 2026-08-31** (branch `JOVI-108-tailwind-liquidglass-foundation`).
 2. ~~`JOVI-109` Camera demo mode — cameraless fallback for `file://` / no-camera grading.~~ **DONE 2026-09-07** (branch `JOVI-109-camera-demo-mode`).
 3. ~~`JOVI-110` Delete `src/prototype/`; ZIP layout with `index.html` at root.~~ **DONE 2026-09-07** (branch `JOVI-110-clean-prototype-zip-layout`).
 4. ~~`JOVI-111` Robustness pass: delete-by-id not by base64.~~ **DONE 2026-09-07** (branch `JOVI-111-indexeddb-delete-by-id`).
-5. `JOVI-112` (proposed) Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
-5. `JOVI-112` (proposed) Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).
+5. ~~`JOVI-112` Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).~~ **DONE 2026-09-07** (branch `JOVI-112-smart-suggestions-performance-feedback`).
 6. `JOVI-113` (proposed) Sprint 2 presentation `.pdf` — team names + RMs, feature→need mapping, data model.
 7. `JOVI-114` (proposed) Mobile-first QA pass 360/390/428 px; `prefers-reduced-motion`; drop `user-scalable=no`; local Lighthouse vs the <200ms claim.
 
