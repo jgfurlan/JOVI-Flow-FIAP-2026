@@ -6,20 +6,16 @@ Deliverable = one ZIP uploaded to the FIAP platform (`src/poc/`) + a `.pdf` pres
 Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind), 5 pts presentation.
 
 ## Active Implementation
-- **Current Task:** `JOVI-113` / `JOVI-114` — Sprint 2 presentation PDF & Mobile-first QA / audit pass.
+- **Current Task:** Sprint 2 Deliverables Ready (Código em ZIP + Apresentação em PDF).
 - **Status:**
-  - `JOVI-108` **implemented** on branch `JOVI-108-tailwind-liquidglass-foundation`, verification passing
-    (headless smoke: 0 failed / 0 external requests, Poppins applied, Tailwind utilities + `@theme` live,
-    CSS 22 KB / ~5.4 KB gz). Spec: `docs/specs/JOVI-108-tailwind-liquidglass-foundation/`.
-  - `JOVI-109` **implemented** on branch `JOVI-109-camera-demo-mode`, verification passing
-    (synthetic animated viewfinder, `file://` auto-advance, error-specific toasts, Bento sharpness spread & featured card,
-    detail/share flows, prefers-reduced-motion respected). Spec: `docs/specs/JOVI-109-camera-demo-mode/`.
-  - `JOVI-110` **implemented** on branch `JOVI-110-clean-prototype-zip-layout`, verification passing
-    (legacy `src/prototype/` removed, CI updated, deterministic packaging script `npm run zip` packages client files with `index.html` at archive root). Spec: `docs/specs/JOVI-110-cleanup-prototype-and-zip-layout/`.
-  - `JOVI-111` **implemented** on branch `JOVI-111-indexeddb-delete-by-id`, verification passing
-    (direct O(1) delete by primary key ID in IndexedDB without loading base64 blobs into memory). Spec: `docs/specs/JOVI-111-indexeddb-delete-by-id/`.
-  - `JOVI-112` **implemented** on branch `JOVI-112-smart-suggestions-performance-feedback`, verification passing
-    (smart contextual camera suggestion pill reactive to Aura temp, instant latency feedback badge `⚡ XXms Zero-Lag`, gallery recommendation banner, and shimmer skeleton placeholders). Spec: `docs/specs/JOVI-112-rubric-smart-suggestions-performance-feedback/`.
+  - `JOVI-114` **implemented** on branch `JOVI-114-mobile-first-qa-audit`, verification passing
+    (automated headless Puppeteer suite, 29/29 assertions green, zero overflow across 360/390/428px,
+    touch targets ≥ 48x48px, prefers-reduced-motion respected, capture-to-save loop 16-19ms < 200ms).
+    Spec: `docs/specs/JOVI-114-mobile-first-qa-audit/`.
+  - `JOVI-113` **implemented** on branch `JOVI-113-sprint2-presentation-document`, verification passing
+    (structured deck in PT-BR `docs/apresentacao-sprint2.md` + 10-slide A4 landscape PDF `docs/jovi-flow-sprint2-apresentacao.pdf`
+    covering team members, RMs, 5 business needs mapping, MER, front-end architecture, and QA audit results).
+    Spec: `docs/specs/JOVI-113-sprint2-presentation-document/`.
 
 ## Completed Features
 - ✅ JOVI-101 Negócio (validated dores and benchmarks).
@@ -33,6 +29,8 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - ✅ JOVI-110 Cleanup legacy `src/prototype/` & automated ZIP packaging (`npm run zip`).
 - ✅ JOVI-111 Robustness pass: delete-by-id in IndexedDB.
 - ✅ JOVI-112 Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (latency badge & skeletons).
+- ✅ JOVI-114 Mobile-First QA & Audit Pass (automated headless test across 360/390/428px, touch targets ≥ 48px, zero overflow, <200ms budget).
+- ✅ JOVI-113 Sprint 2 Presentation Document (10-slide PDF & Markdown in PT-BR).
 
 ## Historical Decisions
 - **2026-04-16:** Standardized on Bootstrap 5.3.3 + Vanilla JS to eliminate bundle overhead.
@@ -51,6 +49,8 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - **2026-09-07:** `JOVI-110` implemented — deleted legacy `src/prototype/`, updated `ci.yml`, and added `scripts/package-zip.mjs` (`npm run zip`) packaging client assets with `index.html` at root into a 49 KB deliverable.
 - **2026-09-07:** `JOVI-111` implemented — direct $O(1)$ delete by primary key ID in IndexedDB without loading Base64 blobs into memory.
 - **2026-09-07:** `JOVI-112` implemented — added contextual suggestion pill (reactive to Aura temperature), performance latency badge (<50ms feedback on capture), and gallery recommendation banner + shimmer skeletons.
+- **2026-09-09:** `JOVI-114` implemented — automated headless testing suite with Puppeteer across viewports 360/390/428px, touch targets raised to min 48x48px, zoom lock removed in viewport meta, and capture latency benchmarked at 16-19ms (<200ms budget).
+- **2026-09-09:** `JOVI-113` implemented — Sprint 2 presentation deck structured in PT-BR (`docs/apresentacao-sprint2.md`) and compiled into a 10-slide A4 landscape PDF (`docs/jovi-flow-sprint2-apresentacao.pdf`) with team members, RMs, business needs mapping, MER, architecture and QA evidence.
 
 ## Feature Queue (ClickUp Tasks)
 1. ~~`JOVI-108` Tailwind v4 hybrid + Liquid Glass foundation + zero external requests.~~ **DONE 2026-08-31** (branch `JOVI-108-tailwind-liquidglass-foundation`).
@@ -58,8 +58,8 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 3. ~~`JOVI-110` Delete `src/prototype/`; ZIP layout with `index.html` at root.~~ **DONE 2026-09-07** (branch `JOVI-110-clean-prototype-zip-layout`).
 4. ~~`JOVI-111` Robustness pass: delete-by-id not by base64.~~ **DONE 2026-09-07** (branch `JOVI-111-indexeddb-delete-by-id`).
 5. ~~`JOVI-112` Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (skeleton screens).~~ **DONE 2026-09-07** (branch `JOVI-112-smart-suggestions-performance-feedback`).
-6. `JOVI-113` (proposed) Sprint 2 presentation `.pdf` — team names + RMs, feature→need mapping, data model.
-7. `JOVI-114` (proposed) Mobile-first QA pass 360/390/428 px; `prefers-reduced-motion`; drop `user-scalable=no`; local Lighthouse vs the <200ms claim.
+6. ~~`JOVI-114` Mobile-first QA pass 360/390/428 px; `prefers-reduced-motion`; drop `user-scalable=no`; local Lighthouse vs the <200ms claim.~~ **DONE 2026-09-09** (branch `JOVI-114-mobile-first-qa-audit`).
+7. ~~`JOVI-113` Sprint 2 presentation `.pdf` — team names + RMs, feature→need mapping, data model.~~ **DONE 2026-09-09** (branch `JOVI-113-sprint2-presentation-document`).
 
 ### Post-submission (after 2026-09-21)
 - `JOVI-115` (proposed) Add `node --test` runner + tests for pure helpers (Kelvin→RGB, Laplacian sharpness, `formatDate`); extract those helpers out of `app.js`.
