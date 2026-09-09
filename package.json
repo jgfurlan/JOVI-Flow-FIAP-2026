@@ -5,6 +5,7 @@
   "scripts": {
     "css": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --minify",
     "css:watch": "tailwindcss -i src/poc/css/input.css -o src/poc/css/jovi.css --watch",
+    "test": "node scripts/qa-mobile-audit.mjs",
     "zip": "node scripts/package-zip.mjs",
     "dist": "npm run zip"
   },

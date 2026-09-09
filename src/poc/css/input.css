@@ -90,7 +90,7 @@
 
   :root {
     /* Non-utility tokens used only inside @layer components */
-    --touch-target: 44px;
+    --touch-target: 48px;
     --glass-bg: rgb(255 255 255 / 0.1);
     --glass-scrim: color-mix(in srgb, black 22%, transparent);
     --glass-blur: blur(12px) saturate(140%);
@@ -386,6 +386,10 @@
     -webkit-backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-xl);
     padding: 0.5rem 1rem;
+    min-height: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.8125rem;
     font-weight: 500;
     cursor: pointer;
@@ -424,6 +428,10 @@
     font-weight: 500;
     cursor: pointer;
     min-height: var(--touch-target);
+    min-width: var(--touch-target);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .gallery-grid {
     flex: 1;
@@ -692,7 +700,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.35rem 0.85rem;
+    min-height: var(--touch-target);
+    padding: 0.35rem 1rem;
     font-size: 0.75rem;
     font-weight: 500;
     color: #ffffff;
@@ -725,6 +734,7 @@
     display: flex;
     align-items: center;
     gap: 0.625rem;
+    min-height: var(--touch-target);
     margin: 0.5rem 1rem 0;
     padding: 0.625rem 0.875rem;
     font-size: 0.8rem;
