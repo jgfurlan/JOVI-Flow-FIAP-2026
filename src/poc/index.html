@@ -33,6 +33,7 @@
                 <canvas id="camera-canvas" class="d-none"></canvas>
                 <canvas id="demo-feed" class="d-none" aria-hidden="true"></canvas>
                 <div id="demo-badge" class="demo-badge d-none" role="status" aria-label="Pré-visualização simulada — câmera indisponível">MODO DEMO</div>
+                <div id="screen-flash" class="screen-flash-overlay d-none" aria-hidden="true"></div>
                 <div id="camera-overlay" class="camera-overlay">
                     <div class="aura-light-effect"></div>
                 </div>
@@ -117,6 +118,7 @@
             </header>
             <div class="detail-view">
                 <img id="detail-image" src="data:," alt="Foto detalhada">
+                <div id="detail-tags" class="detail-tags"></div>
             </div>
             <div class="detail-actions">
                 <button id="btn-add-tag" class="btn btn-outline" aria-label="Adicionar tag">
@@ -125,6 +127,27 @@
                 <button id="btn-share-photo" class="btn btn-primary" aria-label="Compartilhar esta foto">
                     Compartilhar
                 </button>
+            </div>
+
+            <!-- Tag Picker Modal -->
+            <div id="tag-picker-modal" class="tag-picker-modal d-none" role="dialog" aria-modal="true" aria-label="Escolher tag">
+                <div class="tag-picker-content">
+                    <div class="tag-picker-header">
+                        <h3>Adicionar Tag</h3>
+                        <button id="btn-close-tag-picker" class="btn-icon" aria-label="Fechar">✕</button>
+                    </div>
+                    <div class="tag-presets">
+                        <button class="btn-tag-preset" data-tag="Retrato">👤 Retrato</button>
+                        <button class="btn-tag-preset" data-tag="Noturno">🌙 Noturno</button>
+                        <button class="btn-tag-preset" data-tag="Produto">📦 Produto</button>
+                        <button class="btn-tag-preset" data-tag="Favorita">⭐ Favorita</button>
+                        <button class="btn-tag-preset" data-tag="Paisagem">🏞️ Paisagem</button>
+                    </div>
+                    <div class="tag-custom-input flex gap-2">
+                        <input type="text" id="input-custom-tag" placeholder="Nova tag..." maxlength="20" aria-label="Nome da tag">
+                        <button id="btn-save-custom-tag" class="btn btn-primary" aria-label="Salvar tag">Adicionar</button>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -140,6 +163,10 @@
                 <img id="share-preview-image" src="data:," alt="Compartilhar visualização">
             </div>
             <div class="share-options">
+                <button class="btn-share-option" data-platform="download" aria-label="Baixar foto no dispositivo">
+                    <span class="icon-download">📥</span>
+                    <span>Baixar</span>
+                </button>
                 <button class="btn-share-option" data-platform="whatsapp" aria-label="Compartilhar no WhatsApp">
                     <span class="icon-whatsapp">💬</span>
                     <span>WhatsApp</span>
@@ -148,7 +175,7 @@
                     <span class="icon-instagram">📸</span>
                     <span>Instagram</span>
                 </button>
-                <button class="btn-share-option" data-platform="copy" aria-label="Copiar link da foto">
+                <button class="btn-share-option" data-platform="copy" aria-label="Copiar link ou imagem da foto">
                     <span class="icon-copy">📋</span>
                     <span>Copiar</span>
                 </button>
