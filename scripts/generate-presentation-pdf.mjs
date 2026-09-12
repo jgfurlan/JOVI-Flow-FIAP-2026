@@ -327,11 +327,8 @@ const SLIDES_HTML = `<!DOCTYPE html>
 
     <div class="title-meta">
       <div class="meta-col">
-        <h4>Equipe & Matrícula</h4>
-        <p>João Gabriel Furlan — RM 555627 (Chief Architect)</p>
-        <p style="font-size: 12px; font-weight: normal; color: #cbd5e1; margin-top: 2px;">
-          Time: Luna (Research), Orion (Data), Vega (Perf), Mira (UI), Atlas & Iris (QA)
-        </p>
+        <h4>Integrante & Matrícula</h4>
+        <p>João Gabriel Furlan — RM 57039</p>
       </div>
       <div class="meta-col">
         <h4>Curso & Turma</h4>
@@ -898,7 +895,7 @@ const SLIDES_HTML = `<!DOCTYPE html>
         "O futuro da câmera não está em mais tecnologia, mas em experiências mais humanas, intuitivas e inteligentes."
       </p>
       <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.7);">
-        JOVI Flow • FIAP Challenge 2026 • 1TDS • João Gabriel Furlan (RM 555627)
+        JOVI Flow • FIAP Challenge 2026 • 1TDS • João Gabriel Furlan (RM 57039)
       </p>
     </div>
   </div>

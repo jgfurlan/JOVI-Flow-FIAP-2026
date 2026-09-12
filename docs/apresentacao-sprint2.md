@@ -7,12 +7,7 @@
 ---
 
 ## Integrantes da Equipe
-- **João Gabriel Furlan** (Chief Architect) — **RM 555627**
-- **Luna** (AI Researcher)
-- **Orion** (AI Data Architect)
-- **Vega** (AI Web Performance)
-- **Mira** (AI UI/UX Designer)
-- **Atlas** (AI QA Tester) & **Iris** (AI Technical Writer)
+- **João Gabriel Furlan** — **RM 57039**
 
 ---
 
@@ -23,7 +18,7 @@
 - **Subtítulo:** A Câmera Web de Próxima Geração: 3 Toques & Mobile-First
 - **Etapa:** Entrega do Challenge SPRINT 2 — Desenvolvimento Front-End
 - **Instituição:** FIAP — 1º Ano de Análise e Desenvolvimento de Sistemas (1TDS)
-- **Equipe:** João Gabriel Furlan (RM 555627) & Equipe JOVI Flow
+- **Equipe:** João Gabriel Furlan (RM 57039)
 
 ---
 

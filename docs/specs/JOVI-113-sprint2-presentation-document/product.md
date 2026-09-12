@@ -38,7 +38,7 @@ Esta especificação define o conteúdo estruturado, a narrativa estratégica e 
   - Estruturar o documento de apresentação em 10 slides estratégicos de alto impacto visual.
   - Disponibilizar tanto o roteiro textual estruturado em Markdown (`docs/apresentacao-sprint2.md`) quanto o arquivo PDF gerado (`docs/jovi-flow-sprint2-apresentacao.pdf`).
   - Utilizar a paleta de cores oficial JOVI (Azul Royal `#0A3DFF`, Amarelo `#FFD600`, Escuro `#1A1A1A`, Branco `#FFFFFF`), tipografia Poppins e estética Liquid Glass.
-  - Apresentar a equipe completa com RM 555627 (João Gabriel Furlan) e funções do time de engenharia.
+  - Apresentar a identificação do aluno com RM 57039 (João Gabriel Furlan).
 - **Não-Metas:**
   - Dependência de ferramentas externas online (como Figma ou Canva fechados em nuvem) que quebrem a reprodutibilidade local.
 
