@@ -62,19 +62,20 @@ erDiagram
     }
 
     METADADOS {
-        int id PK "Identificador Único"
+        int id PK "Identificador Único (Auto-increment)"
         int midia_id FK "Chave Estrangeira (Cascade Delete)"
         float sharpness_score "Taxa de Nitidez IA (0.0 a 1.0)"
-        string category "Tag Semântica (Retrato, Noturno)"
-        boolean aura_light_sim "Status da Simulação Aura Light"
-        string orientation "Orientação do Dispositivo"
+        string category "Categoria Semântica (Alta Nitidez, Padrão)"
+        int aura_light_sim "Temperatura Aura Light (Kelvin)"
+        string orientation "Orientação do Dispositivo (portrait/landscape)"
+        array tags "Lista de Tags Semânticas (Retrato, Favorita, etc)"
     }
 ```
 
 - **Justificativa da Modelagem:**
-  - **Separação de Preocupações:** Isolamento físico entre o payload binário da foto (`MIDIA`) e os dados de busca/ranking (`METADADOS`), acelerando consultas.
-  - **Offline-First & Local:** Persistido diretamente no `IndexedDB` do navegador (`JOVIFlowDB`), garantindo acesso instantâneo sem depender de conexão de rede.
-  - **Integridade Referencial:** Exclusão atômica em cascata (Cascade Delete) que limpa o armazenamento local sem deixar dados órfãos.
+  - **Separação de Preocupações:** Isolamento físico no IndexedDB (`JOVIFlowDB`) entre as tabelas relacionais `midia` e `metadados`, acelerando consultas de índice e joins em memória.
+  - **Offline-First & Local:** Persistido nativamente no navegador, garantindo autonomia plena sem requisições de rede externas.
+  - **Integridade Referencial:** Exclusão atômica em cascata (Cascade Delete) via transação multiloja, limpando os metadados associados sem deixar registros órfãos.
 
 ---
 
@@ -86,11 +87,12 @@ erDiagram
 | **MIDIA** | `data` | LongBlob | Imagem em Base64 | JPEG codificado com qualidade 0.85 para otimizar espaço |
 | **MIDIA** | `createdAt` | DateTime | Data da captura | String formatada em ISO 8601 UTC |
 | **METADADOS** | `id` (PK) | Integer | Identificador do registro | Auto-incremento de índice local |
-| **METADADOS** | `midia_id` (FK) | Integer | Relação com id de MIDIA | Vínculo obrigatório com exclusão em cascata |
+| **METADADOS** | `midia_id` (FK) | Integer | Relação com id de MIDIA | Vínculo 1:0..1 indexado com exclusão em cascata atômica |
 | **METADADOS** | `sharpness_score` | Float | Índice de nitidez (0.0 a 1.0) | Calculado via filtro de variância Laplacian no Canvas |
-| **METADADOS** | `category` | String | Categoria da foto | Identificação semântica local ('Retrato', 'Noturno') |
-| **METADADOS** | `aura_light_sim` | Boolean | Uso de Aura Light | `true` se houver ajuste térmico ativo na captura |
-| **METADADOS** | `orientation` | String | Orientação do sensor | Persiste `'Portrait'` ou `'Landscape'` |
+| **METADADOS** | `category` | String | Categoria da foto | Identificação semântica local ('Alta Nitidez', 'Padrão') |
+| **METADADOS** | `aura_light_sim` | Integer | Temperatura Aura Light | Valor em Kelvin (2000K a 10000K) selecionado no anel |
+| **METADADOS** | `orientation` | String | Orientação do sensor | Persiste `'portrait'` ou `'landscape'` |
+| **METADADOS** | `tags` | Array | Tags semânticas da foto | Lista de tags atribuídas pelo usuário ('Retrato', 'Favorita', etc) |
 
 ---
 
@@ -103,10 +105,10 @@ erDiagram
   - **APIs Web Modernas Empregadas:**
     - `MediaDevices.getUserMedia`: Aquisição de feed de câmera em tempo real.
     - `Canvas 2D API`: Processamento de imagem local e simulação visual de temperatura de cor.
-    - `IndexedDB API`: Persistência assíncrona não-bloqueante offline-first.
+    - `IndexedDB API`: Persistência relacional multiloja assíncrona não-bloqueante offline-first.
     - `View Transitions API`: Transição cinematográfica nativa entre telas.
     - `Vibration API`: Feedback háptico ao interagir com o obturador Aura Ring.
-    - `Clipboard API`: Cópia instantânea de fotos em um único toque.
+    - `Web Share API & Clipboard API`: Compartilhamento nativo de arquivos e cópia direta.
 
 ---
 
@@ -115,14 +117,16 @@ erDiagram
 1. **Toque 1 — Câmera & Visor Liquid Glass:**
    - 100% da tela dedicada à captura, sem bordas pretas ou menus intrusivos.
    - Anel obturador interativo (*Aura Ring*): toque rápido captura a foto; arraste horizontal altera a temperatura de cor da iluminação (2000K a 10000K) com retorno tátil.
+   - **Flash de Tela Visual:** Clarão de alta intensidade de 250ms com `@keyframes flash-fade` e suporte a hardware torch.
    - Indicador de inteligência artificial (*Performance Spark*) dinâmico.
-2. **Toque 2 — Galeria Bento Inteligente:**
-   - Grade modular que quebra a linearidade tradicional.
-   - Destaque automático (*Featured Card*) para a fotografia com maior nitidez (calculada em tempo real pelo algoritmo de Laplacian).
-   - Card analítico com métricas de economia de bateria e nitidez média.
-3. **Toque 3 — Compartilhamento Instantâneo:**
-   - Acesso em um toque para canais de distribuição (WhatsApp, Instagram e Área de Transferência).
-   - *Optimistic UI*: atualização visual imediata de status antes mesmo da conclusão do envio.
+2. **Toque 2 — Galeria Bento & Seleção Múltipla:**
+   - Grade modular Bento com destaque automático (*Featured Card*) para a foto mais nítida.
+   - **Modo de Seleção:** Botão "Selecionar" com checkboxes dinâmicos e contador em tempo real (`Compartilhar (N)`).
+   - **Visualização de Detalhes & Tags:** Modal de tags com presets rápidos (*Retrato, Noturno, Produto, Favorita*) e tags customizadas salvas no IndexedDB.
+3. **Toque 3 — Compartilhamento Instantâneo & Download:**
+   - **Download Direto:** Gera arquivo JPEG físico no dispositivo (`.jpg`) sem atrito de rede.
+   - Integração com Web Share API para envio direto de arquivo ao WhatsApp/Instagram, além de cópia instantânea.
+   - *Optimistic UI*: feedback visual imediato de confirmação.
 
 ---
 

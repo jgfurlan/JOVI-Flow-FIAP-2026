@@ -502,14 +502,15 @@ const SLIDES_HTML = `<!DOCTYPE html>
               • midia_id: Integer [FK]<br>
               • sharpness_score: Float<br>
               • category: String<br>
-              • aura_light_sim: Bool<br>
-              • orientation: String
+              • aura_light_sim: Int<br>
+              • orientation: String<br>
+              • tags: Array&lt;String&gt;
             </div>
           </div>
         </div>
 
         <div style="margin-top: 14px; font-size: 11.5px; color: #94a3b8; line-height: 1.4;">
-          <strong>Persistência Física:</strong> IndexedDB local do navegador (<code>JOVIFlowDB</code>, store <code>jovi-flow-media</code>) com chave primária atômica <code>id</code>.
+          <strong>Persistência Física:</strong> IndexedDB v2 (<code>JOVIFlowDB</code>, stores relacionais <code>midia</code> e <code>metadados</code> com índice <code>midia_id</code>).
         </div>
       </div>
 
@@ -517,9 +518,9 @@ const SLIDES_HTML = `<!DOCTYPE html>
       <div class="card card-highlight">
         <h3>📐 Justificativas de Arquitetura</h3>
         <ul style="gap: 8px; display: flex; flex-direction: column;">
-          <li><strong>Separação Física de Preocupações:</strong> O blob Base64 de imagem fica separado dos atributos analíticos de consulta rápida, permitindo paginação e ordenação instantâneas na galeria sem recarregar bytes pesados.</li>
-          <li><strong>Offline-First por Concepção:</strong> Zero dependência de servidores remotos ou bancos em nuvem. A persistência local garante que a câmera funcione no meio de um festival, metrô ou em modo avião.</li>
-          <li><strong>Integridade Referencial & Delete Atômico:</strong> O fluxo de deleção (JOVI-111) remove diretamente pela chave primária ID no IndexedDB, executando exclusão limpa em tempo constante $O(1)$.</li>
+          <li><strong>Separação Física de Preocupações:</strong> O blob Base64 em <code>midia</code> fica separado dos metadados e tags em <code>metadados</code>, acelerando filtros, buscas e ordenações sem trafegar bytes pesados.</li>
+          <li><strong>Offline-First por Concepção:</strong> Zero dependência de servidores remotos. A persistência multiloja local garante funcionamento autônomo em qualquer lugar.</li>
+          <li><strong>Integridade Referencial & Cascade Delete:</strong> Exclusão atômica em transação unificada remove o registro em <code>midia</code> e elimina simultaneamente os <code>metadados</code> vinculados pelo índice <code>midia_id</code>.</li>
         </ul>
       </div>
     </div>
@@ -598,14 +599,21 @@ const SLIDES_HTML = `<!DOCTYPE html>
           <td><code>category</code></td>
           <td>String</td>
           <td>Categoria semântica</td>
-          <td>Tag automática para busca e agrupamento (ex: 'Retrato', 'Noturno').</td>
+          <td>Tag automática para busca e agrupamento (ex: 'Alta Nitidez', 'Padrão').</td>
         </tr>
         <tr>
           <td><span class="badge-tag badge-yellow">METADADOS</span></td>
           <td><code>aura_light_sim</code></td>
-          <td>Boolean</td>
-          <td>Simulação Aura Light ativa</td>
-          <td>Flag marcando presença de filtro térmico de cor na captação do frame.</td>
+          <td>Integer</td>
+          <td>Temperatura Aura Light</td>
+          <td>Valor térmico em Kelvin (2000K a 10000K) selecionado no anel obturador.</td>
+        </tr>
+        <tr>
+          <td><span class="badge-tag badge-yellow">METADADOS</span></td>
+          <td><code>tags</code></td>
+          <td>Array</td>
+          <td>Tags semânticas da foto</td>
+          <td>Lista de tags ('Retrato', 'Favorita', etc) gerenciadas interativamente na tela de detalhes.</td>
         </tr>
       </tbody>
     </table>
@@ -689,11 +697,11 @@ const SLIDES_HTML = `<!DOCTYPE html>
           <span class="badge-tag badge-yellow" style="font-size: 12px;">TOQUE 1</span>
           <span style="font-size: 18px;">📸</span>
         </div>
-        <h3 style="color: #ffd600;">Câmera & Aura Shutter</h3>
+        <h3 style="color: #ffd600;">Câmera & Flash de Tela</h3>
         <ul>
           <li><strong>Viewfinder Imersivo:</strong> 100% da área útil dedicada ao enquadramento em tela cheia.</li>
           <li><strong>Anel Térmico Aura:</strong> Gesto horizontal ajusta a temperatura de 2000K a 10000K com cliques hápticos.</li>
-          <li><strong>Performance Spark:</strong> Indicador pulsante confirmando prontidão da IA e estabilização de cena.</li>
+          <li><strong>Screen Flash Visual:</strong> Clarão de alta intensidade de 250ms com animação suave e suporte a hardware torch.</li>
         </ul>
       </div>
 
@@ -703,11 +711,11 @@ const SLIDES_HTML = `<!DOCTYPE html>
           <span class="badge-tag badge-blue" style="font-size: 12px;">TOQUE 2</span>
           <span style="font-size: 18px;">🍱</span>
         </div>
-        <h3 style="color: #3d6fff;">Galeria Bento Inteligente</h3>
+        <h3 style="color: #3d6fff;">Galeria Bento & Seleção</h3>
         <ul>
-          <li><strong>Grid Modular Bento:</strong> Rompe a linearidade chata das galerias tradicionais.</li>
-          <li><strong>Featured Card Automático:</strong> Foto com maior taxa de nitidez recebe destaque prioritário expandido.</li>
-          <li><strong>Dashboard Analítico:</strong> Exibe ganhos de autonomia (+35% bateria) e índice de foco do acervo.</li>
+          <li><strong>Grid Modular Bento:</strong> Destaque automático para a foto de maior nitidez (Laplacian).</li>
+          <li><strong>Modo de Seleção:</strong> Botão "Selecionar" com checkboxes dinâmicos e contador em tempo real.</li>
+          <li><strong>Tags Interativas:</strong> Presets rápidos e tags customizadas salvas na tela de detalhes.</li>
         </ul>
       </div>
 
@@ -717,11 +725,11 @@ const SLIDES_HTML = `<!DOCTYPE html>
           <span class="badge-tag badge-green" style="font-size: 12px;">TOQUE 3</span>
           <span style="font-size: 18px;">🚀</span>
         </div>
-        <h3 style="color: #34c759;">Compartilhamento Rápido</h3>
+        <h3 style="color: #34c759;">Compartilhar & Baixar</h3>
         <ul>
-          <li><strong>Canais Diretos:</strong> WhatsApp, Instagram Stories e cópia em Base64 para área de transferência.</li>
-          <li><strong>Optimistic UI:</strong> Confirmação de status de compartilhamento instantânea antes da resposta externa.</li>
-          <li><strong>Zero App Friction:</strong> Envio sem download prévio de suíte pesada de edição.</li>
+          <li><strong>Download Direto:</strong> Gera e salva arquivo físico JPEG (.jpg) direto no dispositivo.</li>
+          <li><strong>Web Share API:</strong> Envio nativo de fotos para WhatsApp e Instagram com fallback de cópia.</li>
+          <li><strong>Zero App Friction:</strong> Fluxo completo sem depender de downloads em lojas de aplicativos.</li>
         </ul>
       </div>
     </div>
