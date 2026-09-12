@@ -1,7 +1,7 @@
 # JOVI Flow — Apresentação da Sprint 2 (FIAP Challenge 2026)
 
 **Data de Entrega:** 21/09/2026  
-**Curso:** Análise e Desenvolvimento de Sistemas (1TDS) — FIAP  
+**Curso:** Análise e Desenvolvimento de Sistemas (1TDSOA) — FIAP  
 **Disciplina:** Challenge 2026 — Sprint 2 Front-End  
 
 ---
@@ -17,7 +17,7 @@
 - **Título Principal:** JOVI Flow
 - **Subtítulo:** A Câmera Web de Próxima Geração: 3 Toques & Mobile-First
 - **Etapa:** Entrega do Challenge SPRINT 2 — Desenvolvimento Front-End
-- **Instituição:** FIAP — 1º Ano de Análise e Desenvolvimento de Sistemas (1TDS)
+- **Instituição:** FIAP — 1º Ano de Análise e Desenvolvimento de Sistemas (1TDSOA)
 - **Equipe:** João Gabriel Furlan (RM 57039)
 
 ---

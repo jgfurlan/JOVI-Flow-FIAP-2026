@@ -332,7 +332,7 @@ const SLIDES_HTML = `<!DOCTYPE html>
       </div>
       <div class="meta-col">
         <h4>Curso & Turma</h4>
-        <p>Análise e Desenvolvimento de Sistemas (1TDS)</p>
+        <p>Análise e Desenvolvimento de Sistemas (1TDSOA)</p>
         <p style="font-size: 12px; font-weight: normal; color: #cbd5e1; margin-top: 2px;">FIAP — São Paulo, 2026</p>
       </div>
       <div class="meta-col">
@@ -895,7 +895,7 @@ const SLIDES_HTML = `<!DOCTYPE html>
         "O futuro da câmera não está em mais tecnologia, mas em experiências mais humanas, intuitivas e inteligentes."
       </p>
       <p style="margin: 4px 0 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.7);">
-        JOVI Flow • FIAP Challenge 2026 • 1TDS • João Gabriel Furlan (RM 57039)
+        JOVI Flow • FIAP Challenge 2026 • 1TDSOA • João Gabriel Furlan (RM 57039)
       </p>
     </div>
   </div>

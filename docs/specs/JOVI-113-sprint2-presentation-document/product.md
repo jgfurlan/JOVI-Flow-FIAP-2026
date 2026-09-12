@@ -49,7 +49,7 @@ Esta especificação define o conteúdo estruturado, a narrativa estratégica e 
 1. **Slide 1: Capa Oficial**
    - Título: JOVI Flow — A Câmera Web de Próxima Geração
    - Subtítulo: Entrega Sprint 2: Implementação Front-End Mobile-First (3 Toques)
-   - Integrantes, RMs, Turma 1TDS, FIAP Challenge 2026.
+   - Integrantes, RMs, Turma 1TDSOA, FIAP Challenge 2026.
 2. **Slide 2: O Desafio & Proposta de Valor**
    - O problema da experiência de câmera mobile e a proposta do JOVI Flow: 100% Web, zero atrito de app store, mobile-first e preservação de bateria.
 3. **Slide 3: Mapeamento de Necessidades de Negócio (As 5 Dores)**
