@@ -15,6 +15,12 @@ const JOVIFlow = (() => {
     let cameraMode = CAMERA_MODE.LIVE;
     let demoRafId = null;
     let intendedFacing = 'environment';
+    let flashEnabled = false;
+
+    // Gallery Selection State
+    let isSelectMode = false;
+    const selectedPhotoIds = new Set();
+    let currentLoadedPhotos = [];
 
     // Aura Light Gesture State
     let isDragging = false;
@@ -23,6 +29,7 @@ const JOVIFlow = (() => {
     let currentTemperature = 5000;
     let lastCaptureTime = 0;
     let currentPhotoId = null;
+    let currentPhotoTags = [];
 
     const SCREENS = {
         SPLASH: 'splash',
@@ -40,7 +47,8 @@ const JOVIFlow = (() => {
             bindEvents();
             updateCameraSuggestion(currentTemperature);
 
-            // Do not await loadGallery so it doesn't block the UI if DB hangs
+            // Carrega miniatura mais recente e galeria no IndexedDB
+            updateLatestThumbnailFromDB().catch(() => {});
             loadGallery().catch(e => console.error('[JOVI Flow] loadGallery error:', e));
 
             showScreen(SCREENS.SPLASH);
@@ -123,7 +131,10 @@ const JOVIFlow = (() => {
             });
         }
 
-        document.getElementById('btn-gallery-thumb')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
+        document.getElementById('btn-gallery-thumb')?.addEventListener('click', () => {
+            loadGallery();
+            showScreen(SCREENS.GALLERY);
+        });
         document.getElementById('btn-goto-camera')?.addEventListener('click', () => {
             showScreen(SCREENS.CAMERA);
             jovi_camera_resume();
@@ -132,11 +143,47 @@ const JOVIFlow = (() => {
             showScreen(SCREENS.CAMERA);
             jovi_camera_resume();
         });
-        document.getElementById('btn-back-gallery')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
-        document.getElementById('btn-back-detail')?.addEventListener('click', () => showScreen(SCREENS.GALLERY));
-        document.getElementById('btn-share')?.addEventListener('click', openShareScreen);
+        document.getElementById('btn-back-gallery')?.addEventListener('click', () => {
+            loadGallery();
+            showScreen(SCREENS.GALLERY);
+        });
+        document.getElementById('btn-back-detail')?.addEventListener('click', () => {
+            loadGallery();
+            showScreen(SCREENS.GALLERY);
+        });
+
+        // Galeria: Seleção e Compartilhamento
+        document.getElementById('btn-select')?.addEventListener('click', toggleGallerySelectMode);
+        document.getElementById('btn-share')?.addEventListener('click', handleGalleryShareClick);
         document.getElementById('btn-share-photo')?.addEventListener('click', openShareScreen);
         document.getElementById('btn-delete')?.addEventListener('click', deleteCurrentPhoto);
+
+        // Detalhes: Tags
+        document.getElementById('btn-add-tag')?.addEventListener('click', openTagPicker);
+        document.getElementById('btn-close-tag-picker')?.addEventListener('click', closeTagPicker);
+        document.querySelectorAll('.btn-tag-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.tag) {
+                    addTagToCurrentPhoto(btn.dataset.tag);
+                }
+            });
+        });
+        document.getElementById('btn-save-custom-tag')?.addEventListener('click', () => {
+            const input = document.getElementById('input-custom-tag');
+            if (input && input.value) {
+                addTagToCurrentPhoto(input.value);
+                input.value = '';
+            }
+        });
+        document.getElementById('input-custom-tag')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = document.getElementById('input-custom-tag');
+                if (input && input.value) {
+                    addTagToCurrentPhoto(input.value);
+                    input.value = '';
+                }
+            }
+        });
 
         document.querySelectorAll('.btn-share-option').forEach(btn => {
             btn.addEventListener('click', () => shareTo(btn.dataset.platform));
@@ -536,6 +583,7 @@ const JOVIFlow = (() => {
         const captureBtn = document.getElementById('btn-capture');
         if (captureBtn) captureBtn.disabled = true;
 
+        triggerScreenFlash();
         auraEffect?.classList.add('active');
 
         const tCaptureStart = performance.now();
@@ -607,7 +655,7 @@ const JOVIFlow = (() => {
     }
 
     function calculateSharpness(ctx, width, height) {
-        const sampleSize = 100;
+        const sampleSize = 64;
         const sx = Math.floor((width - sampleSize) / 2);
         const sy = Math.floor((height - sampleSize) / 2);
 
@@ -625,8 +673,9 @@ const JOVIFlow = (() => {
             let count = 0;
 
             for (let y = 1; y < size - 1; y++) {
+                const row = y * size;
                 for (let x = 1; x < size - 1; x++) {
-                    const idx = y * size + x;
+                    const idx = row + x;
                     const val = 4 * gray[idx]
                               - gray[idx - 1]
                               - gray[idx + 1]
@@ -639,7 +688,6 @@ const JOVIFlow = (() => {
 
             const meanSquared = varianceSum / count;
             const score = Math.min(1.0, Math.max(0.1, meanSquared / 700));
-            console.log('[JOVI Flow] Sharpness score:', score);
             return parseFloat(score.toFixed(2));
         } catch (e) {
             console.warn('[JOVI Flow] Sharpness check error:', e);
@@ -647,48 +695,146 @@ const JOVIFlow = (() => {
         }
     }
 
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('JOVIFlowDB', 2);
+
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => resolve(request.result);
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                // Store legado para compatibilidade total
+                if (!db.objectStoreNames.contains(STORAGE_KEY)) {
+                    db.createObjectStore(STORAGE_KEY, { keyPath: 'id', autoIncrement: true });
+                }
+                // MER Tabela 1: midia (armazena imagem base64/blob e timestamp)
+                if (!db.objectStoreNames.contains('midia')) {
+                    db.createObjectStore('midia', { keyPath: 'id' });
+                }
+                // MER Tabela 2: metadados (1:0..1 com midia via índice midia_id)
+                if (!db.objectStoreNames.contains('metadados')) {
+                    const metaStore = db.createObjectStore('metadados', { keyPath: 'id', autoIncrement: true });
+                    metaStore.createIndex('midia_id', 'midia_id', { unique: true });
+                }
+            };
+        });
+    }
+
     async function savePhoto(imageData, sharpness) {
         try {
             const db = await openDB();
-            const tx = db.transaction(STORAGE_KEY, 'readwrite');
-            const store = tx.objectStore(STORAGE_KEY);
+            const photoId = Date.now();
+            const createdAt = new Date().toISOString();
+            const score = sharpness || 0.8;
 
-            const photo = {
-                id: Date.now(),
+            const midiaRecord = {
+                id: photoId,
                 data: imageData,
-                sharpness: sharpness || 0.8,
-                createdAt: new Date().toISOString()
+                createdAt: createdAt
             };
 
-            store.add(photo);
+            const metadadosRecord = {
+                midia_id: photoId,
+                sharpness_score: score,
+                category: score > 0.85 ? 'Alta Nitidez' : 'Padrão',
+                aura_light_sim: Math.round(currentTemperature),
+                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
+                tags: []
+            };
+
+            const legacyRecord = {
+                id: photoId,
+                data: imageData,
+                sharpness: score,
+                createdAt: createdAt,
+                tags: []
+            };
+
+            const storeNames = ['midia', 'metadados', STORAGE_KEY].filter(n => db.objectStoreNames.contains(n));
+            const tx = db.transaction(storeNames, 'readwrite');
+
+            if (db.objectStoreNames.contains('midia')) tx.objectStore('midia').put(midiaRecord);
+            if (db.objectStoreNames.contains('metadados')) tx.objectStore('metadados').put(metadadosRecord);
+            if (db.objectStoreNames.contains(STORAGE_KEY)) tx.objectStore(STORAGE_KEY).put(legacyRecord);
+
             await new Promise((resolve, reject) => {
                 tx.oncomplete = resolve;
                 tx.onerror = () => reject(tx.error);
             });
 
-            console.log('[JOVI Flow] Photo saved:', photo.id);
-            return photo;
+            console.log('[JOVI Flow] Photo saved to midia & metadados (id: ' + photoId + ')');
+            return { ...midiaRecord, ...metadadosRecord };
         } catch (error) {
             console.error('[JOVI Flow] Save error:', error);
             showToast('Erro ao salvar foto');
         }
     }
 
-    function openDB() {
+    async function getAllPhotosWithMeta() {
+        const db = await openDB();
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open('JOVIFlowDB', 1);
+            if (db.objectStoreNames.contains('midia') && db.objectStoreNames.contains('metadados')) {
+                const tx = db.transaction(['midia', 'metadados'], 'readonly');
+                const midiaStore = tx.objectStore('midia');
+                const metaStore = tx.objectStore('metadados');
 
-            request.onerror = () => reject(request.error);
+                const midiaReq = midiaStore.getAll();
+                const metaReq = metaStore.getAll();
 
-            request.onsuccess = () => resolve(request.result);
+                tx.oncomplete = () => {
+                    const midiaList = midiaReq.result || [];
+                    const metaList = metaReq.result || [];
+                    const metaMap = new Map();
+                    metaList.forEach(m => metaMap.set(m.midia_id, m));
 
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                if (!db.objectStoreNames.contains(STORAGE_KEY)) {
-                    db.createObjectStore(STORAGE_KEY, { keyPath: 'id', autoIncrement: true });
-                }
-            };
+                    const joined = midiaList.map(m => {
+                        const meta = metaMap.get(m.id) || {};
+                        return {
+                            id: m.id,
+                            data: m.data,
+                            createdAt: m.createdAt,
+                            sharpness: meta.sharpness_score ?? 0.8,
+                            sharpness_score: meta.sharpness_score ?? 0.8,
+                            category: meta.category || 'Padrão',
+                            tags: Array.isArray(meta.tags) ? meta.tags : [],
+                            metaId: meta.id
+                        };
+                    });
+                    resolve(joined.sort((a, b) => b.id - a.id));
+                };
+                tx.onerror = () => reject(tx.error);
+            } else if (db.objectStoreNames.contains(STORAGE_KEY)) {
+                const tx = db.transaction(STORAGE_KEY, 'readonly');
+                const req = tx.objectStore(STORAGE_KEY).getAll();
+                req.onsuccess = () => {
+                    const list = (req.result || []).map(p => ({
+                        id: p.id,
+                        data: p.data,
+                        createdAt: p.createdAt,
+                        sharpness: p.sharpness || 0.8,
+                        sharpness_score: p.sharpness || 0.8,
+                        category: 'Padrão',
+                        tags: p.tags || []
+                    }));
+                    resolve(list.sort((a, b) => b.id - a.id));
+                };
+                req.onerror = () => reject(req.error);
+            } else {
+                resolve([]);
+            }
         });
+    }
+
+    async function updateLatestThumbnailFromDB() {
+        try {
+            const photos = await getAllPhotosWithMeta();
+            if (photos.length > 0) {
+                updateGalleryThumbnail(photos[0].data);
+            }
+        } catch (e) {
+            console.warn('[JOVI Flow] Could not load latest thumbnail:', e);
+        }
     }
 
     async function loadGallery() {
@@ -697,101 +843,178 @@ const JOVIFlow = (() => {
         const footer = document.getElementById('gallery-footer');
         const gallerySuggestion = document.getElementById('gallery-suggestion');
         const gallerySuggestionText = document.getElementById('gallery-suggestion-text');
+        const btnShare = document.getElementById('btn-share');
+        const screenGallery = document.getElementById('screen-gallery');
 
         if (!grid) return;
 
-        // Visual performance feedback: Render skeletons if grid is empty
-        if (grid.querySelectorAll('.gallery-item').length === 0) {
-            for (let i = 0; i < 3; i++) {
-                const skel = document.createElement('div');
-                skel.className = 'gallery-item skeleton-item skeleton';
-                grid.appendChild(skel);
-            }
+        if (screenGallery) {
+            screenGallery.classList.toggle('selecting', isSelectMode);
         }
 
         try {
-            const db = await openDB();
-            const tx = db.transaction(STORAGE_KEY, 'readonly');
-            const store = tx.objectStore(STORAGE_KEY);
-            const request = store.getAll();
+            const photos = await getAllPhotosWithMeta();
+            currentLoadedPhotos = photos;
 
-            request.onsuccess = () => {
-                const photos = request.result.reverse();
-
-                if (photos.length === 0) {
-                    if (empty) empty.style.display = 'flex';
-                    if (footer) footer.style.display = 'none';
-                    if (gallerySuggestion) gallerySuggestion.classList.add('d-none');
-                    grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
-                    return;
-                }
-
-                if (empty) empty.style.display = 'none';
-                if (footer) footer.style.display = 'block';
-
+            if (photos.length === 0) {
+                if (empty) empty.style.display = 'flex';
+                if (footer) footer.style.display = 'none';
+                if (gallerySuggestion) gallerySuggestion.classList.add('d-none');
                 grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
+                if (btnShare) {
+                    btnShare.disabled = true;
+                    btnShare.textContent = 'Compartilhar';
+                }
+                return;
+            }
 
-                // Find highest sharpness index
-                let highestSharpness = 0;
-                let featuredIndex = -1;
+            if (empty) empty.style.display = 'none';
+            if (footer) footer.style.display = 'block';
 
-                photos.forEach((p, idx) => {
-                    if (p.sharpness && p.sharpness > highestSharpness) {
-                        highestSharpness = p.sharpness;
-                        featuredIndex = idx;
+            grid.querySelectorAll('.gallery-item').forEach(el => el.remove());
+
+            // Encontra a foto de maior nitidez
+            let highestSharpness = 0;
+            let featuredIndex = -1;
+
+            photos.forEach((p, idx) => {
+                if (p.sharpness && p.sharpness > highestSharpness) {
+                    highestSharpness = p.sharpness;
+                    featuredIndex = idx;
+                }
+            });
+
+            // Banner inteligente de sugestão
+            if (gallerySuggestion && gallerySuggestionText && featuredIndex !== -1) {
+                const featuredPhoto = photos[featuredIndex];
+                const pct = Math.round(highestSharpness * 100);
+                gallerySuggestionText.textContent = `Sugestão: Foto destacada possui máxima nitidez (${pct}%). Toque para ver.`;
+                gallerySuggestion.classList.remove('d-none');
+                gallerySuggestion.onclick = () => {
+                    if (!isSelectMode) openDetail(featuredPhoto);
+                };
+            } else if (gallerySuggestion) {
+                gallerySuggestion.classList.add('d-none');
+            }
+
+            // Card informativo de otimização no Bento Grid
+            const statCard = document.createElement('div');
+            statCard.className = 'gallery-item stat-card';
+            const avgSharpness = (photos.reduce((acc, p) => acc + (p.sharpness || 0.8), 0) / photos.length * 100).toFixed(0);
+            statCard.innerHTML = `
+                <div class="stat-title">IA Otimização</div>
+                <div class="stat-value">Bateria: +35%</div>
+                <div class="stat-title">Média Nitidez</div>
+                <div class="stat-value">${avgSharpness}%</div>
+            `;
+
+            photos.forEach((photo, idx) => {
+                const item = document.createElement('div');
+                const isFeatured = idx === featuredIndex;
+                const isSelected = selectedPhotoIds.has(photo.id);
+
+                item.className = `gallery-item${isFeatured ? ' featured' : ''}${isSelected ? ' selected' : ''}`;
+                item.dataset.id = String(photo.id);
+
+                let inner = `<img src="${photo.data}" alt="Foto" loading="lazy">`;
+                if (photo.sharpness) {
+                    inner += `<div class="sharpness-badge">Nitidez: ${(photo.sharpness * 100).toFixed(0)}%</div>`;
+                }
+                if (photo.tags && photo.tags.length > 0) {
+                    inner += `<div class="tags-badge" style="position: absolute; bottom: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.7); font-size: 0.7rem; padding: 2px 6px; border-radius: 9999px; color: #fff; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);">🏷️ ${photo.tags.length}</div>`;
+                }
+                inner += `<span class="gallery-item-checkbox" aria-hidden="true">${isSelected ? '✓' : ''}</span>`;
+                item.innerHTML = inner;
+
+                item.addEventListener('click', () => {
+                    if (isSelectMode) {
+                        togglePhotoSelection(photo.id, item);
+                    } else {
+                        openDetail(photo);
                     }
                 });
 
-                // Smart Recommendation Banner
-                if (gallerySuggestion && gallerySuggestionText && featuredIndex !== -1) {
-                    const featuredPhoto = photos[featuredIndex];
-                    const pct = Math.round(highestSharpness * 100);
-                    gallerySuggestionText.textContent = `Sugestão: Foto destacada possui máxima nitidez (${pct}%). Toque para ver.`;
-                    gallerySuggestion.classList.remove('d-none');
-                    gallerySuggestion.onclick = () => openDetail(featuredPhoto);
-                } else if (gallerySuggestion) {
-                    gallerySuggestion.classList.add('d-none');
-                }
+                grid.appendChild(item);
+            });
 
-                // Inject dynamic optimization stats card in Bento grid
-                const statCard = document.createElement('div');
-                statCard.className = 'gallery-item stat-card';
-                const avgSharpness = (photos.reduce((acc, p) => acc + (p.sharpness || 0.8), 0) / photos.length * 100).toFixed(0);
-                statCard.innerHTML = `
-                    <div class="stat-title">IA Otimização</div>
-                    <div class="stat-value">Bateria: +35%</div>
-                    <div class="stat-title">Média Nitidez</div>
-                    <div class="stat-value">${avgSharpness}%</div>
-                `;
+            // Posicionamento no Bento Grid
+            if (grid.children.length > 1) {
+                grid.insertBefore(statCard, grid.children[1]);
+            } else {
+                grid.appendChild(statCard);
+            }
 
-                photos.forEach((photo, idx) => {
-                    const item = document.createElement('div');
-                    const isFeatured = idx === featuredIndex;
-                    item.className = `gallery-item${isFeatured ? ' featured' : ''}`;
-
-                    let inner = `<img src="${photo.data}" alt="Foto" loading="lazy">`;
-                    if (photo.sharpness) {
-                        inner += `<div class="sharpness-badge">Nitidez: ${(photo.sharpness * 100).toFixed(0)}%</div>`;
-                    }
-                    item.innerHTML = inner;
-                    item.addEventListener('click', () => openDetail(photo));
-                    grid.appendChild(item);
-                });
-
-                // Bento styling positioning
-                if (grid.children.length > 1) {
-                    grid.insertBefore(statCard, grid.children[1]);
-                } else {
-                    grid.appendChild(statCard);
-                }
-
-                // Update header title
-                const headerTitle = document.querySelector('.gallery-header h2');
-                if (headerTitle) headerTitle.textContent = 'Galeria Bento';
-            };
+            updateShareButtonState();
         } catch (error) {
             console.error('[JOVI Flow] Load gallery error:', error);
         }
+    }
+
+    function toggleGallerySelectMode() {
+        isSelectMode = !isSelectMode;
+        const btnSelect = document.getElementById('btn-select');
+        const screenGallery = document.getElementById('screen-gallery');
+
+        if (btnSelect) {
+            btnSelect.textContent = isSelectMode ? 'Cancelar' : 'Selecionar';
+        }
+
+        if (screenGallery) {
+            screenGallery.classList.toggle('selecting', isSelectMode);
+        }
+
+        if (!isSelectMode) {
+            selectedPhotoIds.clear();
+            document.querySelectorAll('.gallery-item.selected').forEach(item => {
+                item.classList.remove('selected');
+                const chk = item.querySelector('.gallery-item-checkbox');
+                if (chk) chk.textContent = '';
+            });
+        }
+
+        updateShareButtonState();
+    }
+
+    function togglePhotoSelection(photoId, itemElement) {
+        if (selectedPhotoIds.has(photoId)) {
+            selectedPhotoIds.delete(photoId);
+            itemElement.classList.remove('selected');
+            const chk = itemElement.querySelector('.gallery-item-checkbox');
+            if (chk) chk.textContent = '';
+        } else {
+            selectedPhotoIds.add(photoId);
+            itemElement.classList.add('selected');
+            const chk = itemElement.querySelector('.gallery-item-checkbox');
+            if (chk) chk.textContent = '✓';
+        }
+        updateShareButtonState();
+    }
+
+    function updateShareButtonState() {
+        const btnShare = document.getElementById('btn-share');
+        if (!btnShare) return;
+
+        if (isSelectMode) {
+            const count = selectedPhotoIds.size;
+            btnShare.disabled = count === 0;
+            btnShare.textContent = count > 0 ? `Compartilhar (${count})` : 'Compartilhar';
+        } else {
+            btnShare.disabled = true;
+            btnShare.textContent = 'Compartilhar';
+        }
+    }
+
+    function handleGalleryShareClick() {
+        if (selectedPhotoIds.size === 0) return;
+
+        const selectedList = currentLoadedPhotos.filter(p => selectedPhotoIds.has(p.id));
+        if (selectedList.length === 0) return;
+
+        const targetPhoto = selectedList[0];
+        currentPhotoId = targetPhoto.id;
+        lastPhotoData = targetPhoto.data;
+
+        openShareScreen();
     }
 
     function updateGalleryThumbnail(imageData) {
@@ -806,18 +1029,134 @@ const JOVIFlow = (() => {
     function openDetail(photo) {
         currentPhotoId = photo.id;
         lastPhotoData = photo.data;
-        document.getElementById('detail-image').src = photo.data;
-        document.getElementById('detail-date').textContent = formatDate(photo.createdAt);
+        currentPhotoTags = photo.tags || [];
 
-        // Dynamically assign view-transition-name class to the clicked item
-        document.querySelectorAll('.gallery-item img').forEach(img => {
-            img.classList.remove('transition-active');
-            if (img.src === photo.data) {
-                img.classList.add('transition-active');
+        const img = document.getElementById('detail-image');
+        if (img) img.src = photo.data;
+
+        const date = document.getElementById('detail-date');
+        if (date) date.textContent = formatDate(photo.createdAt);
+
+        renderDetailTags(currentPhotoTags);
+
+        // Atribui transição de visão animada ao item clicado
+        document.querySelectorAll('.gallery-item img').forEach(i => {
+            i.classList.remove('transition-active');
+            if (i.src === photo.data) {
+                i.classList.add('transition-active');
             }
         });
 
         showScreen(SCREENS.DETAIL);
+    }
+
+    function renderDetailTags(tags) {
+        const container = document.getElementById('detail-tags');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!tags || tags.length === 0) return;
+
+        tags.forEach(tag => {
+            const chip = document.createElement('span');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `<span>${tag}</span><span class="btn-remove-tag" role="button" tabindex="0" aria-label="Remover tag ${tag}">✕</span>`;
+            chip.querySelector('.btn-remove-tag').addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeTagFromCurrentPhoto(tag);
+            });
+            container.appendChild(chip);
+        });
+    }
+
+    function openTagPicker() {
+        const modal = document.getElementById('tag-picker-modal');
+        if (modal) {
+            modal.classList.remove('d-none');
+            document.getElementById('input-custom-tag')?.focus();
+        }
+    }
+
+    function closeTagPicker() {
+        const modal = document.getElementById('tag-picker-modal');
+        if (modal) modal.classList.add('d-none');
+    }
+
+    async function addTagToCurrentPhoto(tagText) {
+        const tag = (tagText || '').trim();
+        if (!tag) return;
+
+        if (!currentPhotoId) {
+            showToast('Nenhuma foto selecionada');
+            return;
+        }
+
+        try {
+            const db = await openDB();
+            if (db.objectStoreNames.contains('metadados')) {
+                const tx = db.transaction(['metadados'], 'readwrite');
+                const metaStore = tx.objectStore('metadados');
+                const index = metaStore.index('midia_id');
+                const req = index.get(currentPhotoId);
+
+                req.onsuccess = () => {
+                    const meta = req.result || { midia_id: currentPhotoId, tags: [] };
+                    if (!Array.isArray(meta.tags)) meta.tags = [];
+                    if (meta.tags.includes(tag)) {
+                        showToast('Tag já adicionada');
+                        return;
+                    }
+                    meta.tags.push(tag);
+                    metaStore.put(meta);
+
+                    currentPhotoTags = meta.tags;
+                    renderDetailTags(currentPhotoTags);
+
+                    const cached = currentLoadedPhotos.find(p => p.id === currentPhotoId);
+                    if (cached) cached.tags = meta.tags;
+
+                    showToast(`Tag "${tag}" adicionada`);
+                    closeTagPicker();
+                };
+                req.onerror = () => showToast('Erro ao salvar tag');
+            } else {
+                closeTagPicker();
+            }
+        } catch (e) {
+            console.error('[JOVI Flow] Add tag error:', e);
+            showToast('Erro ao salvar tag');
+        }
+    }
+
+    async function removeTagFromCurrentPhoto(tagText) {
+        if (!currentPhotoId) return;
+
+        try {
+            const db = await openDB();
+            if (db.objectStoreNames.contains('metadados')) {
+                const tx = db.transaction(['metadados'], 'readwrite');
+                const metaStore = tx.objectStore('metadados');
+                const index = metaStore.index('midia_id');
+                const req = index.get(currentPhotoId);
+
+                req.onsuccess = () => {
+                    const meta = req.result;
+                    if (!meta || !Array.isArray(meta.tags)) return;
+                    meta.tags = meta.tags.filter(t => t !== tagText);
+                    metaStore.put(meta);
+
+                    currentPhotoTags = meta.tags;
+                    renderDetailTags(currentPhotoTags);
+
+                    const cached = currentLoadedPhotos.find(p => p.id === currentPhotoId);
+                    if (cached) cached.tags = meta.tags;
+
+                    showToast(`Tag "${tagText}" removida`);
+                };
+            }
+        } catch (e) {
+            console.error('[JOVI Flow] Remove tag error:', e);
+        }
     }
 
     async function deleteCurrentPhoto() {
@@ -825,17 +1164,26 @@ const JOVIFlow = (() => {
 
         try {
             const db = await openDB();
-            const tx = db.transaction(STORAGE_KEY, 'readwrite');
-            const store = tx.objectStore(STORAGE_KEY);
+            const storeNames = ['midia', 'metadados', STORAGE_KEY].filter(n => db.objectStoreNames.contains(n));
+            const tx = db.transaction(storeNames, 'readwrite');
 
-            if (currentPhotoId != null) {
-                store.delete(currentPhotoId);
-            } else {
-                const request = store.getAll();
-                request.onsuccess = () => {
-                    const match = request.result.find(p => p.data === lastPhotoData);
-                    if (match) store.delete(match.id);
+            const targetId = currentPhotoId;
+
+            if (db.objectStoreNames.contains('midia') && targetId != null) {
+                tx.objectStore('midia').delete(targetId);
+            }
+            if (db.objectStoreNames.contains('metadados') && targetId != null) {
+                const metaStore = tx.objectStore('metadados');
+                const index = metaStore.index('midia_id');
+                const getReq = index.getKey(targetId);
+                getReq.onsuccess = () => {
+                    if (getReq.result != null) {
+                        metaStore.delete(getReq.result);
+                    }
                 };
+            }
+            if (db.objectStoreNames.contains(STORAGE_KEY) && targetId != null) {
+                tx.objectStore(STORAGE_KEY).delete(targetId);
             }
 
             await new Promise((resolve, reject) => {
@@ -843,11 +1191,17 @@ const JOVIFlow = (() => {
                 tx.onerror = () => reject(tx.error);
             });
 
+            if (targetId != null) {
+                selectedPhotoIds.delete(targetId);
+            }
+
             currentPhotoId = null;
             lastPhotoData = null;
+            currentPhotoTags = [];
             showToast('Foto excluída');
             showScreen(SCREENS.GALLERY);
-            loadGallery();
+            await loadGallery();
+            await updateLatestThumbnailFromDB();
         } catch (e) {
             console.error('[JOVI Flow] Delete failed:', e);
             showToast('Erro ao excluir foto');
@@ -865,30 +1219,103 @@ const JOVIFlow = (() => {
         if (!status) return;
         status.textContent = '';
 
+        if (!lastPhotoData) {
+            status.textContent = 'Nenhuma foto selecionada para compartilhar';
+            return;
+        }
+
         switch (platform) {
-            case 'whatsapp':
+            case 'download': {
+                try {
+                    const link = document.createElement('a');
+                    link.href = lastPhotoData;
+                    link.download = `jovi-flow-${Date.now()}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    status.textContent = 'Download concluído! Foto salva no dispositivo.';
+                    showToast('Foto baixada!');
+                } catch (err) {
+                    console.error('[JOVI Flow] Download error:', err);
+                    status.textContent = 'Erro ao baixar foto.';
+                }
+                break;
+            }
+
+            case 'whatsapp': {
+                if (navigator.canShare && navigator.share) {
+                    try {
+                        const blob = await (await fetch(lastPhotoData)).blob();
+                        const file = new File([blob], `jovi-flow-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                title: 'JOVI Flow',
+                                text: 'Capturado com JOVI Flow 📸',
+                                files: [file]
+                            });
+                            status.textContent = 'Compartilhado com sucesso!';
+                            return;
+                        }
+                    } catch (e) {
+                        if (e.name !== 'AbortError') console.warn('[JOVI Flow] Native share failed:', e);
+                    }
+                }
                 const waUrl = `https://wa.me/?text=${encodeURIComponent('Compartilhado via JOVI Flow 📸')}`;
                 window.open(waUrl, '_blank');
                 status.textContent = 'Abrindo WhatsApp...';
                 break;
+            }
 
-            case 'instagram':
-                status.textContent = 'Copie a imagem e cole no Instagram';
-                navigator.clipboard.writeText(lastPhotoData).catch(() => {});
+            case 'instagram': {
+                if (navigator.canShare && navigator.share) {
+                    try {
+                        const blob = await (await fetch(lastPhotoData)).blob();
+                        const file = new File([blob], `jovi-flow-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                title: 'JOVI Flow',
+                                text: 'Criado no JOVI Flow 📸',
+                                files: [file]
+                            });
+                            status.textContent = 'Compartilhado com sucesso!';
+                            return;
+                        }
+                    } catch (e) {
+                        if (e.name !== 'AbortError') console.warn('[JOVI Flow] Native share failed:', e);
+                    }
+                }
+                const link = document.createElement('a');
+                link.href = lastPhotoData;
+                link.download = `jovi-flow-instagram-${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                status.textContent = 'Foto baixada! Abra o Instagram e selecione da galeria.';
+                showToast('Foto salva para Instagram');
                 break;
+            }
 
-            case 'copy':
+            case 'copy': {
                 try {
                     const response = await fetch(lastPhotoData);
                     const blob = await response.blob();
                     await navigator.clipboard.write([
                         new ClipboardItem({ 'image/png': blob })
                     ]);
-                    status.textContent = 'Imagem copiada!';
+                    status.textContent = 'Imagem copiada para a área de transferência!';
+                    showToast('Imagem copiada!');
                 } catch (error) {
-                    status.textContent = 'Erro ao copiar. Tente salvar.';
+                    console.warn('[JOVI Flow] Clipboard image copy failed, trying text:', error);
+                    try {
+                        await navigator.clipboard.writeText(lastPhotoData);
+                        status.textContent = 'Dados da imagem copiados!';
+                        showToast('Copiado!');
+                    } catch (e2) {
+                        status.textContent = 'Erro ao copiar. Use o botão Baixar.';
+                    }
                 }
                 break;
+            }
         }
     }
 
@@ -919,19 +1346,37 @@ const JOVIFlow = (() => {
     }
 
     function toggleFlash() {
-        if (cameraMode === CAMERA_MODE.DEMO) {
-            showToast('Flash indisponível no modo demo');
-            return;
+        flashEnabled = !flashEnabled;
+        const btnFlash = document.getElementById('btn-flash');
+        if (btnFlash) {
+            btnFlash.classList.toggle('active', flashEnabled);
+        }
+        showToast(flashEnabled ? 'Flash ativado' : 'Flash desativado');
+    }
+
+    function triggerScreenFlash() {
+        if (!flashEnabled) return;
+
+        if (mediaStream) {
+            const track = mediaStream.getVideoTracks()[0];
+            if (track?.getCapabilities?.()?.torch) {
+                track.applyConstraints({ advanced: [{ torch: true }] }).catch(() => {});
+                setTimeout(() => {
+                    track.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
+                }, 150);
+            }
         }
 
-        if (!mediaStream) return;
-        const track = mediaStream.getVideoTracks()[0];
-        if (track?.getCapabilities?.()?.torch) {
-            const current = track.getSettings().torch;
-            track.applyConstraints({ advanced: [{ torch: !current }] });
-            showToast(!current ? 'Flash ligado' : 'Flash desligado');
-        } else {
-            showToast('Flash não disponível');
+        const overlay = document.getElementById('screen-flash');
+        if (overlay) {
+            overlay.classList.remove('d-none');
+            overlay.classList.remove('flashing');
+            void overlay.offsetWidth;
+            overlay.classList.add('flashing');
+            setTimeout(() => {
+                overlay.classList.remove('flashing');
+                overlay.classList.add('d-none');
+            }, 250);
         }
     }
 

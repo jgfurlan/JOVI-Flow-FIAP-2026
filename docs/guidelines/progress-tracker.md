@@ -6,11 +6,15 @@ Deliverable = one ZIP uploaded to the FIAP platform (`src/poc/`) + a `.pdf` pres
 Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind), 5 pts presentation.
 
 ## Active Implementation
-- **Current Task:** Sprint 2 Deliverables Ready (Código em ZIP + Apresentação em PDF).
+- **Current Task:** Sprint 2 Deliverables Ready & Fully Verified (Código em ZIP + Apresentação em PDF + MER Multi-store funcional).
 - **Status:**
+  - `JOVI-115` **implemented** on branch `JOVI-115-real-functionality-pass`, verification passing
+    (IndexedDB v2 com stores relacionais `midia` e `metadados`, exclusão em cascata atômica, modo de seleção na galeria,
+    sistema de tags persistente, screen flash overlay visual, download direto de foto e miniatura inicial persistida).
+    Spec: `docs/specs/JOVI-115-real-functionality-pass/`.
   - `JOVI-114` **implemented** on branch `JOVI-114-mobile-first-qa-audit`, verification passing
     (automated headless Puppeteer suite, 29/29 assertions green, zero overflow across 360/390/428px,
-    touch targets ≥ 48x48px, prefers-reduced-motion respected, capture-to-save loop 16-19ms < 200ms).
+    touch targets ≥ 48x48px, prefers-reduced-motion respected, capture-to-save loop 15-16ms < 200ms).
     Spec: `docs/specs/JOVI-114-mobile-first-qa-audit/`.
   - `JOVI-113` **implemented** on branch `JOVI-113-sprint2-presentation-document`, verification passing
     (structured deck in PT-BR `docs/apresentacao-sprint2.md` + 10-slide A4 landscape PDF `docs/jovi-flow-sprint2-apresentacao.pdf`
@@ -31,6 +35,7 @@ Grading: 15 pts code (funcionalidade + correct HTML/CSS/JS/Bootstrap-or-Tailwind
 - ✅ JOVI-112 Rubric features: "sugestões automáticas de uso" + "feedback visual de performance" (latency badge & skeletons).
 - ✅ JOVI-114 Mobile-First QA & Audit Pass (automated headless test across 360/390/428px, touch targets ≥ 48px, zero overflow, <200ms budget).
 - ✅ JOVI-113 Sprint 2 Presentation Document (10-slide PDF & Markdown in PT-BR).
+- ✅ JOVI-115 Implementação Real do MER, Seleção na Galeria, Tags, Screen Flash e Download Direto.
 
 ## Historical Decisions
 - **2026-04-16:** Standardized on Bootstrap 5.3.3 + Vanilla JS to eliminate bundle overhead.
