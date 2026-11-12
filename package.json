@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@fontsource/poppins": "^5.3.0",
-    "@tailwindcss/cli": "4.3.3",
+    "@tailwindcss/cli": "4.3.5",
     "puppeteer": "^25.8.0"
   }
 }
